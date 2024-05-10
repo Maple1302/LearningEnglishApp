@@ -3,6 +3,10 @@ const completedLesson = "completedLesson";
 const email = "email";
 const process = "process";
 const userName = "username";
+const heart = "heart";
+const gem = "gem";
+const streak = "streak";
+const language = "language";
 //ERROR
 const emailInvalid= "Email chưa hợp lệ";
 const passwordInvalid = "Password chưa hợp lệ";

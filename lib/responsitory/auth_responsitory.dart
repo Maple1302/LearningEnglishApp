@@ -7,15 +7,16 @@ import 'package:maple/utils/constants.dart';
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-   final UserModelMapper _userModelMapper = UserModelMapper();
- Stream<UserModel> get authStateChangesWithModel =>
+  final UserModelMapper _userModelMapper = UserModelMapper();
+  Stream<UserModel> get authStateChangesWithModel =>
       _auth.authStateChanges().transform(_userModelMapper.userMapper);
-
+ 
+  
 
   String _notification = "";
   get noti => _notification;
   get auth => _auth;
- 
+
   Future<UserModel?> signInWithEmailAndPassword(
       String email, String password) async {
     try {
@@ -37,7 +38,11 @@ class AuthRepository {
             email: email,
             completedLessons: userData[completedLesson],
             process: userData[process],
-            username: userData[userName]);
+            username: userData[userName],
+            language: 'en',
+            heart: userData[heart],
+            streak: userData[streak],
+            gem: userData[gem]);
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -64,9 +69,12 @@ class AuthRepository {
         email: email,
         completedLesson: "0",
         process: "0",
+        language: 'en',
+        heart: "5",
+        streak: "0",
+        gem: "500"
       });
       sendEmailverification();
-      
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         rethrow;
@@ -89,8 +97,6 @@ class AuthRepository {
       _auth.signInWithProvider(googleAuthProvider);
       final user = _auth.currentUser;
       if (user != null) {
-        
-      
         DocumentSnapshot documentSnapshot =
             await _firestore.collection('Users').doc(user.uid).get();
         if (documentSnapshot.exists) {
@@ -101,18 +107,24 @@ class AuthRepository {
               email: user.email,
               completedLessons: userData[completedLesson],
               process: userData[process],
-              username: userData[userName]);
-        }
-        else {
+              username: userData[userName],
+              language: 'en',
+              heart: userData[heart],
+              streak: userData[streak],
+              gem: userData[gem]);
+        } else {
           await _firestore.collection('Users').doc(user.uid).set({
             userName: user.displayName ?? "",
             email: user.email,
             completedLesson: "0",
             process: "0",
+            language: 'en',
+            heart: "5",
+            streak: "0",
+            gem: "500"
           });
         }
-      }
-      else{
+      } else {
         return null;
       }
 
@@ -122,12 +134,12 @@ class AuthRepository {
     }
     return null;
   }
+
   Future<void> signOut() async {
     try {
       await FirebaseAuth.instance.signOut();
-    
     } catch (e) {
-     rethrow;
+      rethrow;
     }
   }
 }

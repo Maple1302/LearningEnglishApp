@@ -10,7 +10,7 @@ import 'package:maple/models/usermodel.dart';
 import 'package:maple/responsitory/auth_responsitory.dart';
 
 class AuthViewModel extends ChangeNotifier {
- final AuthRepository _authRepository =AuthRepository();
+ final AuthRepository _authRepository = AuthRepository();
 
   Stream<UserModel>? get authStateChangesWithModel =>
       _authRepository.authStateChangesWithModel;
@@ -135,8 +135,11 @@ class AuthViewModel extends ChangeNotifier {
   Future signInWithGoogleAccount(BuildContext context) async {
     try {
       _currentUser = null;
+      _isLoading = true;
       final user = await _authRepository.signInWithGoogleAccount();
+     
       _currentUser = user;
+      _isLoading = false;
     } catch (e) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context)

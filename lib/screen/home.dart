@@ -16,8 +16,12 @@ class HomePage extends StatelessWidget {
   @override
   
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Home Page'),
+     final authViewModel = Provider.of<AuthViewModel>(context);
+    return  Center(
+      child: Center(child: ElevatedButton(onPressed: (){
+        authViewModel.signOut(context);
+         Navigator.pushReplacementNamed(context, '/');
+      }, child: const Text("Đăng xuất")),),
     );
   }
 }
@@ -55,7 +59,6 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
-    print(authViewModel.currentUser?.uid);
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Colors.blueAccent,
@@ -66,9 +69,9 @@ class _HomeState extends State<Home> {
                 'images/flag_america.png',
                 height: 35,
               ),
-              itemAppBar('images/fire.png', authViewModel.currentUser?.email ?? ""),
-              itemAppBar('images/gem.png', ' 1142'),
-              itemAppBar('images/heart.png', ' 4')
+              itemAppBar('images/fire.png', authViewModel.currentUser?.streak ?? "0"),
+              itemAppBar('images/gem.png', authViewModel.currentUser?.gem ?? "0"),
+              itemAppBar('images/heart.png', authViewModel.currentUser?.heart ?? "0")
             ],
           ),
         ),
