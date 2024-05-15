@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:maple/screen/home.dart';
+import 'package:maple/views/home/home.dart';
 
 class Levels extends StatefulWidget {
   const Levels({super.key});

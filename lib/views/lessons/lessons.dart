@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:maple/screen/levels.dart';
+import 'package:maple/views/lessons/levels.dart';
 class Lessons extends StatelessWidget {
   const Lessons({super.key});
 

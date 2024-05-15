@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:maple/screen/levels.dart';
+import 'package:maple/views/lessons/levels.dart';
 import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:provider/provider.dart';
 

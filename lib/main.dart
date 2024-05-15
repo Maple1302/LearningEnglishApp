@@ -1,10 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:maple/firebase_options.dart';
-import 'package:maple/screen/home.dart';
+import 'package:maple/views/home/home.dart';
 import 'package:maple/viewmodels/auth_viewmodel.dart';
-import 'package:maple/views/sign_in_view.dart';
-import 'package:maple/views/sign_up_view.dart';
+import 'package:maple/views/auth/sign_in_view.dart';
+import 'package:maple/views/auth/sign_up_view.dart';
+import 'package:maple/views/lessons/hearingcheck.dart';
+import 'package:maple/views/questions/speech_check.dart';
+import 'package:maple/views/questions/questions_screen.dart';
 import 'package:provider/provider.dart';
 
 //Material app
@@ -21,9 +24,12 @@ Future<void> main() async {
   );
 
   // runApp( ChangeData());
-  runApp(const MaterialApp(
+  runApp( MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: MyHome(),
+    theme: ThemeData(
+        primaryColor: Colors.blue, 
+      ),
+    home: const QuestionsScreen(),
   ));
 }
 //runApp(const ChangeData());
@@ -44,7 +50,10 @@ class MyHome extends StatelessWidget {
         routes: {
           '/': (context) =>const SignInView(), // Màn hình đăng nhập là màn hình mặc định       
           '/home': (context) => const Home(),
-          '/signup': (context) => const SignUpView()
+          '/signup': (context) => const SignUpView(),
+          '/speechcheck':(context) => const PronunciationCheckView(sampleText: '',),
+          '/hearingcheck':(context) =>  const HearingCheckView(),
+          QuestionsScreen.routeName:(context) =>const QuestionsScreen(),
         },
       ),
     );
