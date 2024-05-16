@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:maple/helper/audio_helper.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class PronunciationCheckView extends StatefulWidget {
@@ -13,15 +14,15 @@ class PronunciationCheckView extends StatefulWidget {
 
 class _PronunciationCheckViewState extends State<PronunciationCheckView> {
   late stt.SpeechToText _speech;
-   bool _isListening = false;
+  bool _isListening = false;
   String _userText = "";
   bool standards = false;
-  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
+    AudioHelper.speak(widget.sampleText);
   }
 
   @override
@@ -66,7 +67,22 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.volume_up, size: 30),
+                        
+                        IconButton(
+                            icon: const Icon(Icons.volume_up,size: 40,
+                                color: Colors.blue), // Icon volume up màu đen
+                            onPressed: () {
+                              // Thêm hành động khi nút được nhấn
+                              if(!_isListening){
+                                AudioHelper.speak(widget.sampleText);
+                              }
+                            },
+                            splashColor:
+                                Colors.transparent, // Bỏ hiệu ứng splash
+                            highlightColor:
+                                Colors.transparent, // Bỏ hiệu ứng highlight
+                          ),
+                        
                         const SizedBox(width: 10),
                         Expanded(
                           child: _highlightedText(),
@@ -75,17 +91,19 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
-                    onPressed: _isListening ? null : _startListening,
-                    icon: _isListening
-                        ? const SpinKitWave(color: Colors.white, size: 20.0)
-                        : const Icon(Icons.mic),
-                    label: Text(_isListening ? 'ĐANG NGHE...' : 'NHẤN ĐỂ NÓI'),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.blue,
-                      minimumSize: const Size(double.infinity, 50),
+                      onPressed: _isListening ? null : _startListening,
+                      icon: _isListening
+                          ? const SpinKitWave(color: Colors.white, size: 20.0)
+                          : const Icon(Icons.mic),
+                      label:
+                          Text(_isListening ? 'ĐANG NGHE...' : 'NHẤN ĐỂ NÓI'),
+                      style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.blue,
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15))),
                     ),
-                  ),
                   ],
                 ),
               ),
@@ -103,10 +121,11 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
               ElevatedButton(
                 onPressed: _evaluatePronunciation,
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  backgroundColor: Colors.blue,
-                  minimumSize: const Size(double.infinity, 50),
-                ),
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.green,
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15))),
                 child: const Text(
                   'KIỂM TRA',
                   style: TextStyle(color: Colors.white),
@@ -125,13 +144,15 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
       text: TextSpan(
         children: sampleWords.map((word) {
           bool matched = userWords.contains(_normalizeText(word));
-          if(matched){countRatio++;}
+          if (matched) {
+            countRatio++;
+          }
           standards = countRatio / sampleWords.length > 0.7;
-          if(countRatio / sampleWords.length == 1){
+          if (countRatio / sampleWords.length == 1) {
             _speech.stop();
             _isListening = false;
           }
-         
+
           return TextSpan(
             text: '$word ',
             style: TextStyle(
@@ -148,10 +169,9 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
     bool available = await _speech.initialize(
       onStatus: (status) {
         if (status == 'notListening') {
-           _evaluatePronunciation();
+          _evaluatePronunciation();
           setState(() {
             _isListening = false;
-           
           });
         }
       },
@@ -181,13 +201,13 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
   }
 
   void _evaluatePronunciation() {
-    if (standards) {AudioHelper.playSound('correct');
+    if (standards) {
+      AudioHelper.playSound('correct');
       _showResultDialog(
           "Rất giỏi! Dịch Nghĩa:\n" "Xin chào, Bạn tên gì?", true);
-      
-    } else {AudioHelper.playSound('incorrect');
+    } else {
+      AudioHelper.playSound('incorrect');
       _showResultDialog('Có vẻ không đúng, thử lại lần nữa nhé', false);
-      
     }
   }
 
@@ -235,7 +255,8 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
               ],
             ),
             const SizedBox(height: 20),
-            check ? ElevatedButton(
+            check
+                ? ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor: Colors.green,
@@ -253,5 +274,11 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
         ),
       ),
     ));
+  }
+  @override
+  void dispose(){
+    super.dispose();
+    AudioHelper.disposeAudio();
+    AudioHelper.disposeTts();
   }
 }

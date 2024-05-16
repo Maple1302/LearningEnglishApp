@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
+import 'package:maple/views/questions/image_card_check.dart';
 import 'package:maple/views/questions/speech_check.dart';
 import 'package:maple/views/questions/background_decoration.dart';
 import 'package:maple/views/questions/messagebubble.dart';
 import 'package:maple/views/questions/transerlationscreen.dart';
+import 'package:maple/views/questions/translation_view.dart';
 
 class QuestionsScreen extends StatelessWidget {
-  const QuestionsScreen({super.key});
+ final List<Map<String, String>> items = [
+    {'image': 'images/restaurant.png', 'text': 'kem', 'mean': 'ice cream'},
+    {'image': 'images/crown.png', 'text': 'em bé', 'mean': 'baby'},
+    {
+      'image': 'images/easter-egg_colorful.png',
+      'text': 'màu vàng',
+      'mean': 'yellow'
+    },
+    {'image': 'images/gem.png', 'text': 'sô-cô-la', 'mean': 'socola'},
+  ];
+   QuestionsScreen({super.key});
   static String routeName = "/questionScreen";
+   
 
   @override
   Widget build(BuildContext context) {
@@ -69,9 +81,10 @@ class QuestionsScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: const BackgroundDecoration(
+      body:   BackgroundDecoration(
         child: Center(
-            child:/* CardAnswer(
+            child:ImageSelectionScreen(expectedWord: 'ice cream', correctAnswer: 'kem', items:items ,)/*PronunciationCheckView( sampleText: "Hello, What's your name?",),TranselateView(expectedSentence: 'Vâng, tôi muốn hai chiếc Pizza', missingSentence: 'Yes,I would like to ', correctanswers: 'pizzas',)
+             ImageSelectionScreen(expectedWord: 'ice cream', correctAnswer: 'kem', items: items,)CardAnswer(
                 question: "hodhfishfisdjofsoidfois jofojsdofjsoi",
                 correctAnswer: "hello",
                 answers: [
@@ -79,20 +92,7 @@ class QuestionsScreen extends StatelessWidget {
               "hello",
               "good",
               "too much"
-            ])*/  /*PronunciationCheckView( sampleText: "Hello, What's your name?",),*/ TranslationScreen(question:  "My younger sister isn't here todaybbbbbbbbbbbbbb", correctAnswer: ['Hôm', 'nay','em','gái','tôi','không','có', 'ở','đây',], answers: [
-    'Hôm',
-    'đây',
-    'gái',
-    'có',
-    'tôi',
-    'em',
-    'ít',
-    'không',
-    'ở',
-    'muốn',
-    'nay',
-    'thích'
-  ],)
+            ])*/  /* */
             ),
       ),
     );

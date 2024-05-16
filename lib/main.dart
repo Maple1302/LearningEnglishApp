@@ -29,7 +29,7 @@ Future<void> main() async {
     theme: ThemeData(
         primaryColor: Colors.blue, 
       ),
-    home: const QuestionsScreen(),
+    home:  QuestionsScreen(),
   ));
 }
 //runApp(const ChangeData());
@@ -53,7 +53,7 @@ class MyHome extends StatelessWidget {
           '/signup': (context) => const SignUpView(),
           '/speechcheck':(context) => const PronunciationCheckView(sampleText: '',),
           '/hearingcheck':(context) =>  const HearingCheckView(),
-          QuestionsScreen.routeName:(context) =>const QuestionsScreen(),
+          QuestionsScreen.routeName:(context) => QuestionsScreen(),
         },
       ),
     );

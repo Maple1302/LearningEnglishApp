@@ -1,5 +1,5 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:maple/helper/audio_helper.dart';
 
 class TranslationScreen extends StatefulWidget {
   final String question;
@@ -11,19 +11,22 @@ class TranslationScreen extends StatefulWidget {
       required this.question,
       required this.correctAnswer,
       required this.answers});
-  // ignore: library_private_types_in_public_api, no_logic_in_create_state
+  
   @override
-  // ignore: library_private_types_in_public_api
   _TranslationScreenState createState() =>
-      // ignore: no_logic_in_create_state
+     
       _TranslationScreenState();
 }
 
 class _TranslationScreenState extends State<TranslationScreen> {
   List<String> selectedAnswers = [];
-  List<bool> visibility = List.generate(12, (index) => true);
-  final AudioPlayer _audioPlayer = AudioPlayer();
-
+  List<bool> visibility = List.generate(100, (index) => true);
+ 
+  @override
+  void initState(){
+    super.initState();
+    AudioHelper.speak(widget.question);
+  }
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -60,10 +63,20 @@ class _TranslationScreenState extends State<TranslationScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.volume_up,
-                          color: Colors.blue,
-                        ),
+                        IconButton(
+                            icon: const Icon(Icons.volume_up,size: 40,
+                                color: Colors.blue), // Icon volume up màu đen
+                            onPressed: () {
+                              // Thêm hành động khi nút được nhấn
+                            
+                                AudioHelper.speak(widget.question);
+                              
+                            },
+                            splashColor:
+                                Colors.transparent, // Bỏ hiệu ứng splash
+                            highlightColor:
+                                Colors.transparent, // Bỏ hiệu ứng highlight
+                          ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -158,6 +171,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
+                          
                         ),
                         child: Text(widget.answers[index]),
                       ),
@@ -185,11 +199,11 @@ class _TranslationScreenState extends State<TranslationScreen> {
                         if (compareLists(
                             selectedAnswers, widget.correctAnswer)) {
                           // Hiển thị thông báo đáp án đúng
-                          playSound("correct");
+                         AudioHelper.playSound("correct");
                           showResultDialog("Chính xác!", true);
                         } else {
                           // Hiển thị thông báo đáp án sai
-                          playSound("incorrect");
+                         AudioHelper.playSound("incorrect");
                           showResultDialog("Không chính xác!", false);
                         }
                       }
@@ -222,28 +236,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
 
     return true; // Cả hai danh sách giống nhau
   }
-  void playSound(String type) async {
-    String source = "";
-    switch (type) {
-      case 'correct':
-        source = 'sounds/correct_answer.mp3';
-        break;
-      case 'incorrect':
-        source = 'sounds/fail.mp3';
-        break;
-      case 'error':
-        source = 'sounds/error.mp3';
-        break;
-      case 'fail':
-        source = 'sounds/fail.mp3';
-        break;
-      // Thêm các trường hợp khác cần xử lý
-      default:
-        // Xử lý mặc định nếu không có trường hợp nào khớp
-        break;
-    }
-    await _audioPlayer.play(AssetSource(source));
-  }
+ 
 
   void showResultDialog(String message, bool check) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -340,5 +333,11 @@ class _TranslationScreenState extends State<TranslationScreen> {
           0, result.length - 1); // Cắt bỏ ký tự cuối cùng (dấu cách)
     }
     return result;
+  }
+ @override
+  void dispose(){
+    super.dispose();
+    AudioHelper.disposeAudio();
+    AudioHelper.disposeTts();
   }
 }
