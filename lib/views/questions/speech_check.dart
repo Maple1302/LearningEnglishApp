@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:audioplayers/audioplayers.dart';
 
 class PronunciationCheckView extends StatefulWidget {
   final String sampleText;
@@ -23,29 +22,6 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
-  }
-
-  void playSound(String type) async {
-    String source = "";
-    switch (type) {
-      case 'correct':
-        source = 'sounds/correct_answer.mp3';
-        break;
-      case 'incorrect':
-        source = 'sounds/fail.mp3';
-        break;
-      case 'error':
-        source = 'sounds/error.mp3';
-        break;
-      case 'fail':
-        source = 'sounds/fail.mp3';
-        break;
-      // Thêm các trường hợp khác cần xử lý
-      default:
-        // Xử lý mặc định nếu không có trường hợp nào khớp
-        break;
-    }
-    await _audioPlayer.play(AssetSource(source));
   }
 
   @override
@@ -181,7 +157,7 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
       },
       onError: (error) {
         _showResultDialog('Bạn chưa phát âm phải không? ', false);
-        playSound('error');
+        AudioHelper.playSound('error');
       },
     );
 
@@ -200,16 +176,16 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
       );
     } else {
       _showResultDialog('Vui lòng cho phép ghi âm', false);
-      playSound('fail');
+      AudioHelper.playSound('fail');
     }
   }
 
   void _evaluatePronunciation() {
-    if (standards) {playSound('correct');
+    if (standards) {AudioHelper.playSound('correct');
       _showResultDialog(
           "Rất giỏi! Dịch Nghĩa:\n" "Xin chào, Bạn tên gì?", true);
       
-    } else {playSound('incorrect');
+    } else {AudioHelper.playSound('incorrect');
       _showResultDialog('Có vẻ không đúng, thử lại lần nữa nhé', false);
       
     }
@@ -277,12 +253,5 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
         ),
       ),
     ));
-  }
-
-  @override
-  void dispose() {
-    _speech.stop();
-     _audioPlayer.dispose();
-    super.dispose();
   }
 }
