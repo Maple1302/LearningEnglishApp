@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:maple/helper/audio_helper.dart';
 
-class TranselateView extends StatefulWidget {
-  final String expectedSentence;
-  final String missingSentence;
-  final String correctanswers;
-  const TranselateView(
-      {super.key,
-      required this.expectedSentence,
-      required this.missingSentence,
-      required this.correctanswers});
+class ListenScreen extends StatefulWidget {
+  final String correctAnswer;
+  final List<String> items;
+
+  const ListenScreen(
+      {super.key, required this.items, required this.correctAnswer});
 
   @override
-  State<TranselateView> createState() => _TranselateViewState();
+  State<ListenScreen> createState() => _ListenScreenState();
 }
 
-class _TranselateViewState extends State<TranselateView> {
-  final TextEditingController _textEditingController = TextEditingController();
- 
+class _ListenScreenState extends State<ListenScreen> {
+  int selectedIndex = -1;
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -32,76 +28,89 @@ class _TranselateViewState extends State<TranselateView> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                  alignment: Alignment.topLeft,
-                  child: const Text(
-                    "Hoàn tất bản dịch",
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                  )),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                      child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 15),
-                    margin: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: Colors.grey[300]!, width: 2),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.expectedSentence,
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )),
-                ],
+              const Text(
+                'Bạn nghe được gì',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 20),
-              Expanded(
-                  child: Container(
-                      alignment: Alignment.topLeft,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(
-                          color: Colors.grey, // Màu của viền
-                          width: 2.0, // Độ rộng của viền
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            Text(widget.missingSentence,
-                                style: const TextStyle(fontSize: 18)),
-                            SizedBox(
-                              width: 100,
-                              height: 30,
-                              child: TextField(
-                                style: const TextStyle(fontSize: 18),
-                                controller: _textEditingController,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ))),
               const SizedBox(
                 height: 20,
               ),
+              Container(
+                width: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Colors.grey[300]!, width: 3),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.volume_up,
+                      size: 60, color: Colors.blue), // Icon volume up màu đen
+                  onPressed: () {
+                    // Thêm hành động khi nút được nhấn
+
+                    AudioHelper.speak(widget.correctAnswer);
+                  },
+                  splashColor: Colors.transparent, // Bỏ hiệu ứng splash
+                  highlightColor: Colors.transparent, // Bỏ hiệu ứng highlight
+                ),
+              ),
+              const Spacer(),
+              ListView.builder(
+                shrinkWrap:
+                    true, // Đảm bảo ListView chỉ chiếm không gian cần thiết
+                itemCount: widget.items.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15)),
+                        foregroundColor: Colors.black,
+                        backgroundColor: selectedIndex == index
+                            ? Colors.white.withBlue(255)
+                            : Colors.white,
+                        minimumSize: const Size(double.infinity, 50),
+                        side: BorderSide(
+                            color: selectedIndex == index
+                                ? Colors.green
+                                : Colors.grey,
+                            width: 3),
+                      ),
+                      onPressed: () {
+                        // Hành động cho từng nút
+                        setState(() {
+                          selectedIndex = index;
+                        });
+                      },
+                      child: Text(widget.items[index],
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: selectedIndex == index
+                                ? Colors.green
+                                : Colors.black,
+                          )),
+                    ),
+                  );
+                },
+              ),
+              const Spacer(),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      selectedIndex == -1 ? Colors.grey[300] : Colors.green,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  elevation: 6,
+                  shadowColor: selectedIndex == -1
+                      ? Colors.grey[300]
+                      : Colors.green.withOpacity(0.5),
+                ),
                 onPressed: () {
-                  if (widget.correctanswers.toLowerCase() ==
-                      _textEditingController.text.toLowerCase()) {
+                  if (widget.items[selectedIndex] == widget.correctAnswer) {
                     AudioHelper.playSound("correct");
                     showResultDialog("Chính xác!", true);
                   } else {
@@ -109,16 +118,11 @@ class _TranselateViewState extends State<TranselateView> {
                     showResultDialog("Không chính xác!", false);
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.blue,
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15))),
-                child: const Text(
-                  'KIỂM TRA',
-                  style: TextStyle(color: Colors.white),
-                ),
+                child: Text('KIỂM TRA',
+                    style: TextStyle(
+                        fontSize: 16,
+                        color:
+                            selectedIndex == -1 ? Colors.black : Colors.white)),
               ),
             ],
           ),
@@ -179,7 +183,7 @@ class _TranselateViewState extends State<TranselateView> {
                 ? Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      widget.correctanswers,
+                      widget.correctAnswer,
                       style: TextStyle(
                         color: check ? Colors.green : Colors.red,
                         fontSize: 16,
@@ -208,12 +212,5 @@ class _TranselateViewState extends State<TranselateView> {
         ),
       ),
     ));
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    AudioHelper.disposeAudio();
-    AudioHelper.disposeTts();
   }
 }

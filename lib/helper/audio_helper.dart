@@ -26,17 +26,23 @@ class AudioHelper {
     }
     await _audioPlayer.play(AssetSource(source));
   }
-  static Future<void> speak(String text) async {
+
+  static Future<void> speak(String text,{double speed = 1}) async {
+    await flutterTts.setSpeechRate(speed);
     await flutterTts.setLanguage('en-US'); // Đặt ngôn ngữ là tiếng Anh (Mỹ)
     await flutterTts.setPitch(1.0); // Đặt pitch mặc định (1.0)
-    await flutterTts.speak(text); // Phát âm thanh từ văn bản
+    await flutterTts.speak(text);
+
+    // Phát âm thanh từ văn bản
   }
-  static void disposeTts(){
+
+ 
+
+  static void disposeTts() {
     flutterTts.stop();
-    
   }
-  static void disposeAudio(){
+
+  static void disposeAudio() {
     _audioPlayer.stop();
   }
 }
-
