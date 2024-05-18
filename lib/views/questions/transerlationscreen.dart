@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:maple/UI/custom_buttons.dart';
+import 'package:maple/UI/custom_messagebox.dart';
 import 'package:maple/helper/audio_helper.dart';
+import 'package:maple/utils/constants.dart';
 
 class TranslationScreen extends StatefulWidget {
   final String question;
   final List<String> correctAnswer;
   final List<String> answers;
-  final String type;//type[listen,transelation]
+  final String type; //type[listen,transelation]
   @override
   const TranslationScreen(
       {super.key,
@@ -15,8 +18,7 @@ class TranslationScreen extends StatefulWidget {
       required this.type});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _TranslationScreenState createState() => _TranslationScreenState();
+  State<TranslationScreen> createState() => _TranslationScreenState();
 }
 
 class _TranslationScreenState extends State<TranslationScreen> {
@@ -46,7 +48,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
             //crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.type == "listen"
+                widget.type == transerlateListen
                     ? 'Nhấn vào những gì bạn nghe'
                     : 'Dịch câu này',
                 style:
@@ -56,7 +58,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  widget.type == "listen"
+                  widget.type == transerlateListen
                       ? Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -90,18 +92,17 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: Image.asset(
-                                  'images/turtle-icon.png',
-                                  width: 60,
-                                  height: 60,
-                                  color:Colors.blue
-                                ), // Icon volume up màu đen
+                                icon: Image.asset('images/turtle-icon.png',
+                                    width: 60,
+                                    height: 60,
+                                    color:
+                                        Colors.blue), // Icon volume up màu đen
                                 onPressed: () {
                                   // Thêm hành động khi nút được nhấn
                                   setState(() {
-                                    AudioHelper.speak(widget.question,speed: 0.1);
+                                    AudioHelper.speak(widget.question,
+                                        speed: 0.1);
                                   });
-                                  
                                 },
                                 splashColor:
                                     Colors.transparent, // Bỏ hiệu ứng splash
@@ -112,44 +113,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                           ),
                         )
                       : Expanded(
-                          child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 15),
-                          margin: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(15),
-                            border:
-                                Border.all(color: Colors.grey[300]!, width: 2),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.volume_up,
-                                    size: 30,
-                                    color:
-                                        Colors.blue), // Icon volume up màu đen
-                                onPressed: () {
-                                  // Thêm hành động khi nút được nhấn
-
-                                  AudioHelper.speak(widget.question);
-                                },
-                                splashColor:
-                                    Colors.transparent, // Bỏ hiệu ứng splash
-                                highlightColor:
-                                    Colors.transparent, // Bỏ hiệu ứng highlight
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  widget.question,
-                                  style: const TextStyle(fontSize: 18),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )),
+                          child: MessageQuestion(question: widget.question)),
                 ],
               ),
               const SizedBox(height: 20),
@@ -167,32 +131,27 @@ class _TranslationScreenState extends State<TranslationScreen> {
               SizedBox(
                 height:
                     155, // Đặt chiều cao để có đủ không gian cho các dòng kẻ
-                child: Wrap(
-                  spacing: 8.0,
-                  runSpacing: 8.0,
-                  children: List.generate(
-                    selectedAnswers.length,
-                    (index) => ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          int optionIndex =
-                              widget.answers.indexOf(selectedAnswers[index]);
+                child: Align(
+                  alignment: Alignment.topLeft, // Căn trái
+                  child: Wrap(
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: List.generate(
+                        selectedAnswers.length,
+                        (index) => FittedBox(
+                              child: ButtonItems(
+                                onPressed: () {
+                                  setState(() {
+                                    int optionIndex = widget.answers
+                                        .indexOf(selectedAnswers[index]);
 
-                          visibility[optionIndex] = true;
-                          selectedAnswers.removeAt(index);
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.black,
-                        backgroundColor: Colors.white,
-                        elevation: 4,
-                        side: const BorderSide(color: Colors.grey, width: 2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(selectedAnswers[index]),
-                    ),
+                                    visibility[optionIndex] = true;
+                                    selectedAnswers.removeAt(index);
+                                  });
+                                },
+                                child: Text(selectedAnswers[index]),
+                              ),
+                            )),
                   ),
                 ),
               ),
@@ -207,62 +166,33 @@ class _TranslationScreenState extends State<TranslationScreen> {
                   runSpacing: 8.0,
                   children: List.generate(widget.answers.length, (index) {
                     return Visibility(
-                      replacement: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                        replacement: FittedBox(
+                          child: ButtomItemReplace(
+                            child: Text(
+                              widget.answers[index],
+                              style: const TextStyle(color: Colors.grey),
+                            ),
                           ),
                         ),
-                        child: Text(
-                          widget.answers[index],
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      ),
-                      visible: visibility[index],
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            selectedAnswers.add(widget.answers[index]);
+                        visible: visibility[index],
+                        child: FittedBox(
+                          child: ButtonItems(
+                            onPressed: () {
+                              setState(() {
+                                selectedAnswers.add(widget.answers[index]);
 
-                            visibility[index] = false;
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.black,
-                          backgroundColor: Colors.white,
-                          elevation: 4,
-                          side: const BorderSide(color: Colors.grey, width: 3),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                                visibility[index] = false;
+                              });
+                            },
+                            child: Text(widget.answers[index]),
                           ),
-                        ),
-                        child: Text(widget.answers[index]),
-                      ),
-                    );
+                        ));
                   }).toList(),
                 ),
               ),
               const Spacer(),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  side: BorderSide(
-                      color: selectedAnswers.isNotEmpty
-                          ? Colors.green.withOpacity(0.5)
-                          : Colors.grey,
-                      width: selectedAnswers.isNotEmpty ? 3 : 0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(15), // Góc bo tròn của nút
-                  ),
-                  shadowColor: Colors.green,
-                  elevation: 6,
-                  backgroundColor:
-                      selectedAnswers.isNotEmpty ? Colors.green : Colors.grey,
-                  minimumSize: const Size(double.infinity, 50),
-                ),
+              ButtonCheck(
+                enable: selectedAnswers.isNotEmpty,
                 onPressed: selectedAnswers.isNotEmpty
                     ? () {
                         if (compareLists(
@@ -276,18 +206,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                           showResultDialog("Không chính xác!", false);
                         }
                       }
-                    : null,
-                child: Center(
-                    child: Text(
-                  'Kiểm tra'.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: selectedAnswers.isNotEmpty
-                        ? Colors.white
-                        : Colors.black26,
-                  ),
-                )),
+                    : () {},
               ),
             ],
           ),
@@ -370,22 +289,12 @@ class _TranslationScreenState extends State<TranslationScreen> {
                     ))
                 : const SizedBox(),
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(15), // Góc bo tròn của nút
-                ),
-                shadowColor: Colors.grey,
-                elevation: 6,
-                foregroundColor: Colors.white,
-                backgroundColor: check ? Colors.green : Colors.red,
-                minimumSize: const Size(double.infinity, 50),
-              ),
+            ButtonCheck(
+              type: check ? typeButtonCheck : typeButtonCheckDialog,
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
               },
-              child: Text('Tiếp tục'.toUpperCase()),
+              text: "Tiếp tục",
             )
           ],
         ),

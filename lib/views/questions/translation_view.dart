@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
+import 'package:maple/utils/constants.dart';
 
 class TranselateView extends StatefulWidget {
   final String expectedSentence;
@@ -17,7 +19,7 @@ class TranselateView extends StatefulWidget {
 
 class _TranselateViewState extends State<TranselateView> {
   final TextEditingController _textEditingController = TextEditingController();
- 
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -88,6 +90,20 @@ class _TranselateViewState extends State<TranselateView> {
                               width: 100,
                               height: 30,
                               child: TextField(
+                                cursorColor: Colors.blue, // Thay đổi màu con trỏ
+                                decoration: const InputDecoration(
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors
+                                            .grey), // Viền khi TextField không được focus
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.blue,
+                                        width:
+                                            2.0), // Viền khi TextField được focus
+                                  ),
+                                ),
                                 style: const TextStyle(fontSize: 18),
                                 controller: _textEditingController,
                               ),
@@ -98,7 +114,7 @@ class _TranselateViewState extends State<TranselateView> {
               const SizedBox(
                 height: 20,
               ),
-              ElevatedButton(
+              ButtonCheck(
                 onPressed: () {
                   if (widget.correctanswers.toLowerCase() ==
                       _textEditingController.text.toLowerCase()) {
@@ -109,16 +125,7 @@ class _TranselateViewState extends State<TranselateView> {
                     showResultDialog("Không chính xác!", false);
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.blue,
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15))),
-                child: const Text(
-                  'KIỂM TRA',
-                  style: TextStyle(color: Colors.white),
-                ),
+                
               ),
             ],
           ),
@@ -187,22 +194,12 @@ class _TranselateViewState extends State<TranselateView> {
                     ))
                 : const SizedBox(),
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(15), // Góc bo tròn của nút
-                ),
-                shadowColor: Colors.grey,
-                elevation: 6,
-                foregroundColor: Colors.white,
-                backgroundColor: check ? Colors.green : Colors.red,
-                minimumSize: const Size(double.infinity, 50),
-              ),
+            ButtonCheck(
+              type:check ? typeButtonCheck : typeButtonCheckDialog,
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
               },
-              child: Text('Tiếp tục'.toUpperCase()),
+              text: 'tiếp tục',
             )
           ],
         ),

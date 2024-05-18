@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
+import 'package:maple/utils/constants.dart';
 
 class ImageSelectionScreen extends StatefulWidget {
    final String expectedWord; 
@@ -79,7 +81,7 @@ class _ImageSelectionScreenState extends State<ImageSelectionScreen> {
                 ),
                 itemCount: widget.items.length,
                 itemBuilder: (context, index) {
-                  return ElevatedButton(
+                  return ButtonItems(
                     onPressed: () {
                       setState(() {
                         answerSelected = widget.items[index]['mean'];
@@ -87,19 +89,7 @@ class _ImageSelectionScreenState extends State<ImageSelectionScreen> {
                         AudioHelper.speak(widget.items[index]['mean']!);
                       });
                     },
-                    style: ElevatedButton.styleFrom(
-                        elevation: 6,
-                        foregroundColor: Colors.black,
-                        backgroundColor: Colors.white,
-                        side: BorderSide(
-                            width: 3,
-                            color: selectedIndex == index
-                                ? Colors.blue
-                                : Colors.grey),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        shadowColor: Colors.blue),
+                    checked: selectedIndex == index,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -116,7 +106,7 @@ class _ImageSelectionScreenState extends State<ImageSelectionScreen> {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
+              child: ButtonCheck(
                 onPressed: () {
                   if (answerSelected == widget.expectedWord) {
                     showResultDialog("Chính xác!", true);
@@ -126,19 +116,8 @@ class _ImageSelectionScreenState extends State<ImageSelectionScreen> {
                     AudioHelper.playSound("incorrect");
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                    elevation: 6,
-                    foregroundColor: Colors.black,
-                    backgroundColor:
-                        answerSelected!.isNotEmpty ? Colors.blue : Colors.grey,
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15))),
-                child:  Text(
-                  'KIỂM TRA',
-                  style: TextStyle(color:answerSelected!.isNotEmpty
-                  ? Colors.white:Colors.black),
-                ),
+               text:'Kiểm tra' ,
+             enable: answerSelected!.isNotEmpty,
               ),
             ),
           ],
@@ -209,22 +188,13 @@ class _ImageSelectionScreenState extends State<ImageSelectionScreen> {
                     ))
                 : const SizedBox(),
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(15), // Góc bo tròn của nút
-                ),
-                shadowColor: Colors.grey,
-                elevation: 6,
-                foregroundColor: Colors.white,
-                backgroundColor: check ? Colors.green : Colors.red,
-                minimumSize: const Size(double.infinity, 50),
-              ),
+            ButtonCheck(
+             
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
               },
-              child: Text('Tiếp tục'.toUpperCase()),
+              text: 'tiếp tục',
+              type:check ? typeButtonCheck : typeButtonCheckDialog
             )
           ],
         ),

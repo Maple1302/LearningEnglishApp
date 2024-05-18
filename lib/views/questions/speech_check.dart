@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
+import 'package:maple/utils/constants.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class PronunciationCheckView extends StatefulWidget {
@@ -9,7 +11,7 @@ class PronunciationCheckView extends StatefulWidget {
 
   @override
   // ignore: library_private_types_in_public_api
-  _PronunciationCheckViewState createState() => _PronunciationCheckViewState();
+  State<PronunciationCheckView> createState() => _PronunciationCheckViewState();
 }
 
 class _PronunciationCheckViewState extends State<PronunciationCheckView> {
@@ -67,22 +69,20 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
                   children: [
                     Row(
                       children: [
-                        
                         IconButton(
-                            icon: const Icon(Icons.volume_up,size: 40,
-                                color: Colors.blue), // Icon volume up màu đen
-                            onPressed: () {
-                              // Thêm hành động khi nút được nhấn
-                              if(!_isListening){
-                                AudioHelper.speak(widget.sampleText);
-                              }
-                            },
-                            splashColor:
-                                Colors.transparent, // Bỏ hiệu ứng splash
-                            highlightColor:
-                                Colors.transparent, // Bỏ hiệu ứng highlight
-                          ),
-                        
+                          icon: const Icon(Icons.volume_up,
+                              size: 40,
+                              color: Colors.blue), // Icon volume up màu đen
+                          onPressed: () {
+                            // Thêm hành động khi nút được nhấn
+                            if (!_isListening) {
+                              AudioHelper.speak(widget.sampleText);
+                            }
+                          },
+                          splashColor: Colors.transparent, // Bỏ hiệu ứng splash
+                          highlightColor:
+                              Colors.transparent, // Bỏ hiệu ứng highlight
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: _highlightedText(),
@@ -118,18 +118,8 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
                 ),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
+              ButtonCheck(
                 onPressed: _evaluatePronunciation,
-                style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.green,
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15))),
-                child: const Text(
-                  'KIỂM TRA',
-                  style: TextStyle(color: Colors.white),
-                ),
               ),
             ],
           ),
@@ -256,16 +246,12 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
             ),
             const SizedBox(height: 20),
             check
-                ? ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.green,
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
+                ? ButtonCheck(
+                    type:check ? typeButtonCheck :typeButtonCheckDialog,
                     onPressed: () {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     },
-                    child: const Text('Tiếp tục'),
+                    text: 'Tiếp tục',
                   )
                 : const SizedBox(
                     height: 0,
@@ -275,8 +261,9 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
       ),
     ));
   }
+
   @override
-  void dispose(){
+  void dispose() {
     super.dispose();
     AudioHelper.disposeAudio();
     AudioHelper.disposeTts();

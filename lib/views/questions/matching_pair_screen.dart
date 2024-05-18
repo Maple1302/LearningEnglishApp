@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+
+import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
+
+import 'package:flutter_color/flutter_color.dart';
+import 'package:maple/utils/constants.dart';
 
 class MatchingPairScreen extends StatefulWidget {
   final List<Map<String, String>> items;
+  final String type;
 
   const MatchingPairScreen({
     super.key,
     required this.items,
+    required this.type,
   });
 
   @override
@@ -20,9 +27,12 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
   int count = 0;
   int selectedIndexLeft = -1; // -1 means no item is selected
   int selectedIndexRight = -1; // -1 means no item is selected
+  bool enableButton = false;
+  int selectAnswer = -1;
   @override
   Widget build(BuildContext context) {
     return Card(
+        color: HexColor("#fffffd"),
         elevation: 4,
         margin: const EdgeInsets.only(top: 10, bottom: 16),
         shape: const RoundedRectangleBorder(
@@ -36,7 +46,7 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
             const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                'Chọn hình ảnh đúng',
+                'Nhấn vào cặp từ tương ứng',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
@@ -56,13 +66,17 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
                       maintainState: true,
                       maintainAnimation: true,
                       maintainSize: true,
-                      child: ElevatedButton(
+                      child: ButtonItems(
                         onPressed: () {
                           setState(() {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            AudioHelper.disposeAudio();
+                            AudioHelper.disposeTts();
                             if (index % 2 == 0) {
                               answerSelectedLeft = widget.items[index]['mean']!;
                               selectedIndexLeft = index;
-                              AudioHelper.speak(widget.items[index]['mean']!);
+                              selectAnswer = index;
+                              AudioHelper.speak(widget.items[index]['text']!);
                             } else {
                               answerSelectedRight =
                                   widget.items[index]['text']!;
@@ -73,44 +87,46 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
                               if (answerSelectedLeft == answerSelectedRight) {
                                 visibility[selectedIndexRight] = false;
                                 visibility[selectedIndexLeft] = false;
-                                print( visibility[selectedIndexRight]);
-                                selectedIndexLeft = -1;
-                                selectedIndexRight = -1;
-                                count +=2;
 
+                                count += 2;
                                 if (count == widget.items.length) {
                                   showResultDialog("Tuyệt vời!", true);
+                                  enableButton = true;
                                 } else {
                                   showResultDialog("Chính xác!", true);
                                 }
+                                selectedIndexLeft = -1;
+                                selectedIndexRight = -1;
+
                                 AudioHelper.playSound("correct");
                               } else {
                                 showResultDialog("Không chính xác!", false);
                                 AudioHelper.playSound("incorrect");
+                                selectedIndexLeft = -1;
+                                selectedIndexRight = -1;
                               }
                             }
                           });
                         },
-                        style: ElevatedButton.styleFrom(
-                            elevation: 6,
-                            foregroundColor: Colors.black,
-                            backgroundColor: Colors.white,
-                            side: BorderSide(
-                                width: 3,
-                                color: (index == selectedIndexRight ||
-                                        index == selectedIndexLeft)
-                                    ? Colors.blue
-                                    : Colors.grey),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            shadowColor: Colors.blue),
-                        child: Text(capitalize(widget.items[index]['text']!),
-                            style: const TextStyle(fontSize: 16)),
+                        checked: (index == selectedIndexLeft ||
+                            index == selectedIndexRight),
+                        child: (widget.type == matchingsound && index % 2 == 0)
+                            ? const Center(
+                                child: Icon(Icons.volume_up,
+                                    size: 40, color: Colors.blue),
+                              )
+                            : Text(capitalize(widget.items[index]['text']!),
+                                style: const TextStyle(fontSize: 16)),
                       ));
                 },
               ),
             ),
+            Padding(
+                padding: const EdgeInsets.all(16),
+                child: ButtonCheck(
+                  enable: enableButton,
+                  onPressed: () {},
+                )),
           ],
         ));
   }
@@ -169,7 +185,9 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
                 ? Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      '',
+                      selectAnswer != -1
+                          ? capitalize(widget.items[selectAnswer]['mean']!)
+                          : '',
                       style: TextStyle(
                         color: check ? Colors.green : Colors.red,
                         fontSize: 16,
@@ -177,23 +195,13 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
                     ))
                 : const SizedBox(),
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(15), // Góc bo tròn của nút
-                ),
-                shadowColor: Colors.grey,
-                elevation: 6,
-                foregroundColor: Colors.white,
-                backgroundColor: check ? Colors.green : Colors.red,
-                minimumSize: const Size(double.infinity, 50),
-              ),
+            ButtonCheck(
+              text: "Tiếp tục",
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
               },
-              child: Text('Tiếp tục'.toUpperCase()),
-            )
+              type: !check ? typeButtonCheckDialog : typeButtonCheck,
+            ),
           ],
         ),
       ),

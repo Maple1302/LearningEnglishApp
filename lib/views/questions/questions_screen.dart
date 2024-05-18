@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
+import 'package:maple/utils/constants.dart';
 import 'package:maple/views/questions/complete_conversation.dart';
 import 'package:maple/views/questions/image_card_check.dart';
 import 'package:maple/views/questions/listening_screen.dart';
@@ -29,14 +30,15 @@ class QuestionsScreen extends StatelessWidget {
     'Flow',
   ];
   final List<Map<String, String>> itemMatchPair = [
-    {'text': 'kem', 'mean': 'ice cream'},
+   
     {'mean': 'em bé', 'text': 'baby'},
     {'text': 'em bé', 'mean': 'baby'},
     {'mean': 'kem', 'text': 'ice cream'},
     {'text': 'màu vàng', 'mean': 'yellow'},
     {'mean': 'sô-cô-la', 'text': 'socola'},
     {'text': 'sô-cô-la', 'mean': 'socola'},
-    {'mean': 'màu vàng', 'text': 'yellow'},
+    {'mean': 'màu vàng', 'text': 'yellow'}, 
+    {'text': 'kem', 'mean': 'ice cream'},
   ];
   QuestionsScreen({super.key});
   static String routeName = "/questionScreen";
@@ -100,19 +102,23 @@ class QuestionsScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: BackgroundDecoration(
+      body:  const BackgroundDecoration(
         child: Center(
             child:
-            MatchingPairScreen(items: itemMatchPair)/* ListenScreen(
+           /* 
+           MatchingPairScreen(items: itemMatchPair,type:matchingword)
+
+           ListenScreen(
           items: itemsWord,
-          correctAnswer: 'Flow',
-        )  CompleteConversation(question:  'Is that boy your brother, Lisa?', items: itemsConversation,correctAnswer: 'Yes, it\'s next to the big university.')
-            TranslationScreen(question: 'She an older sister', correctAnswer:['she','an','older','sister'], answers: ['she','an','has','right','older','sister'], type: 'a')
-           
-           
-            ImageSelectionScreen(expectedWord: 'ice cream', correctAnswer: 'kem', items:items ,)
+          correctAnswer: 'Flow',)  
+          
+          CompleteConversation(question:  'Is that boy your brother, Lisa?', items: itemsConversation,correctAnswer: 'Yes, it\'s next to the big university.')
+           ImageSelectionScreen(expectedWord: 'ice cream', correctAnswer: 'kem', items:items ,)
             PronunciationCheckView( sampleText: "Hello, What's your name?",),
-            TranselateView(expectedSentence: 'Vâng, tôi muốn hai chiếc Pizza', missingSentence: 'Yes,I would like to ', correctanswers: 'pizzas',)
+  TranselateView(expectedSentence: 'Vâng, tôi muốn hai chiếc Pizza', missingSentence: 'Yes,I would like to ', correctanswers: 'pizzas',)
+          */ //DONE
+
+           
             CardAnswer(
                 question: "hodhfishfisdjofsoidfois jofojsdofjsoi",
                 correctAnswer: "hello",
@@ -121,7 +127,11 @@ class QuestionsScreen extends StatelessWidget {
               "hello",
               "good",
               "too much"
-            ])*/ /* */
+            ])
+                 /*  
+           
+           
+              */ /* */
             ),
       ),
     );

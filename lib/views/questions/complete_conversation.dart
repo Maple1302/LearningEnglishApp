@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:maple/UI/custom_messagebox.dart';
+import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
+import 'package:maple/utils/constants.dart';
 
 class CompleteConversation extends StatefulWidget {
   final String question;
@@ -7,15 +10,17 @@ class CompleteConversation extends StatefulWidget {
   final String correctAnswer;
 
   const CompleteConversation(
-      {super.key, required this.question, required this.items, required this.correctAnswer});
+      {super.key,
+      required this.question,
+      required this.items,
+      required this.correctAnswer});
 
   @override
   State<CompleteConversation> createState() => _CompleteConversationState();
 }
 
 class _CompleteConversationState extends State<CompleteConversation> {
- 
-   int selectedIndex = -1;
+  int selectedIndex = -1;
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -39,47 +44,15 @@ class _CompleteConversationState extends State<CompleteConversation> {
                 height: 20,
               ),
               Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: const EdgeInsets.all(14.0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(color: Colors.grey, width: 3),
-                  ),
-                  child: SizedBox(
-                    width: 200,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment
-                          .start, // Đảm bảo các icon và text được căn chỉnh đúng
-                      children: [
-                        const Icon(Icons.volume_up, color: Colors.blue,size: 30,),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          // Sử dụng Expanded để Text có thể bọc xuống và không bị cắt ngang
-                          child: Text(
-                            widget.question,
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+                  alignment: Alignment.centerLeft,
+                  child: MessageQuestion(question: widget.question)),
               const SizedBox(
                 height: 20,
               ),
-              Align(
+              const Align(
                 alignment: Alignment.centerRight,
-                child: Container(
-                  padding: const EdgeInsets.all(14.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withBlue(255),
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(color: Colors.blue, width: 3),
-                  ),
-                  child: const SizedBox(
+                child: MessageBoxAwsome(
+                  child: SizedBox(
                       width: 100,
                       height: 30,
                       child: Align(
@@ -96,56 +69,39 @@ class _CompleteConversationState extends State<CompleteConversation> {
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)
-                        ),
-                        foregroundColor: Colors.black,
-                        backgroundColor: selectedIndex == index ? Colors.white.withBlue(255): Colors.white,
-                        minimumSize: const Size(double.infinity, 50),
-                        side:  BorderSide(color: selectedIndex == index ?Colors.green: Colors.grey,width: 3),
-                      ),
+                    child: ButtonItems(
+                      checked: selectedIndex == index,
                       onPressed: () {
                         // Hành động cho từng nút
                         setState(() {
-                           selectedIndex = index;
+                          selectedIndex = index;
                         });
-                         
                       },
-                      child: Text(widget.items[index],style: TextStyle(fontSize: 18,color: selectedIndex == index ?Colors.green: Colors.black,)),
+                      child: Text(widget.items[index],
+                          style: const TextStyle(fontSize: 18)),
                     ),
                   );
                 },
               ),
-              
               const Spacer(),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:selectedIndex == -1 ? Colors.grey[300]: Colors.green,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  elevation: 6,
-                  shadowColor: selectedIndex == -1 ? Colors.grey[300]: Colors.green.withOpacity(0.5),
-                ),
+              ButtonCheck(
+                enable: selectedIndex != -1,
                 onPressed: () {
-                  if(widget.items[selectedIndex] == widget.correctAnswer){
-                     AudioHelper.playSound("correct");
+                  if (widget.items[selectedIndex] == widget.correctAnswer) {
+                    AudioHelper.playSound("correct");
                     showResultDialog("Chính xác!", true);
-                  }
-                  else{
-                     AudioHelper.playSound("incorrect");
+                  } else {
+                    AudioHelper.playSound("incorrect");
                     showResultDialog("Không chính xác!", false);
                   }
                 },
-                child:  Text('KIỂM TRA',
-                    style: TextStyle(fontSize: 16, color: selectedIndex == -1 ? Colors.black: Colors.white)),
               ),
             ],
           ),
         ));
   }
-   void showResultDialog(String message, bool check) {
+
+  void showResultDialog(String message, bool check) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       backgroundColor: Colors.white,
       duration: const Duration(seconds: 100),
@@ -207,28 +163,16 @@ class _CompleteConversationState extends State<CompleteConversation> {
                     ))
                 : const SizedBox(),
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(15), // Góc bo tròn của nút
-                ),
-                shadowColor: Colors.grey,
-                elevation: 6,
-                foregroundColor: Colors.white,
-                backgroundColor: check ? Colors.green : Colors.red,
-                minimumSize: const Size(double.infinity, 50),
-              ),
+            ButtonCheck(
+              type: check ? typeButtonCheck : typeButtonCheckDialog,
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
               },
-              child: Text('Tiếp tục'.toUpperCase()),
+              text: "tiếp tục",
             )
           ],
         ),
       ),
     ));
   }
-
-  
 }

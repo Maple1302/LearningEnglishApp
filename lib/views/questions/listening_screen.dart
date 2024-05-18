@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
+import 'package:maple/utils/constants.dart';
 
 class ListenScreen extends StatefulWidget {
   final String correctAnswer;
@@ -64,52 +66,30 @@ class _ListenScreenState extends State<ListenScreen> {
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15)),
-                        foregroundColor: Colors.black,
-                        backgroundColor: selectedIndex == index
-                            ? Colors.white.withBlue(255)
-                            : Colors.white,
-                        minimumSize: const Size(double.infinity, 50),
-                        side: BorderSide(
-                            color: selectedIndex == index
-                                ? Colors.green
-                                : Colors.grey,
-                            width: 3),
-                      ),
+                    child: ButtonItems(
+                     
+                      checked: selectedIndex == index,
                       onPressed: () {
                         // Hành động cho từng nút
                         setState(() {
                           selectedIndex = index;
+                          AudioHelper.speak(widget.items[index]);
                         });
                       },
                       child: Text(widget.items[index],
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 18,
-                            color: selectedIndex == index
-                                ? Colors.green
-                                : Colors.black,
+                            
                           )),
                     ),
                   );
                 },
               ),
               const Spacer(),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      selectedIndex == -1 ? Colors.grey[300] : Colors.green,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                  elevation: 6,
-                  shadowColor: selectedIndex == -1
-                      ? Colors.grey[300]
-                      : Colors.green.withOpacity(0.5),
-                ),
+              ButtonCheck(
+                enable: selectedIndex != -1 ,
                 onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   if (widget.items[selectedIndex] == widget.correctAnswer) {
                     AudioHelper.playSound("correct");
                     showResultDialog("Chính xác!", true);
@@ -118,11 +98,7 @@ class _ListenScreenState extends State<ListenScreen> {
                     showResultDialog("Không chính xác!", false);
                   }
                 },
-                child: Text('KIỂM TRA',
-                    style: TextStyle(
-                        fontSize: 16,
-                        color:
-                            selectedIndex == -1 ? Colors.black : Colors.white)),
+               
               ),
             ],
           ),
@@ -191,22 +167,13 @@ class _ListenScreenState extends State<ListenScreen> {
                     ))
                 : const SizedBox(),
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(15), // Góc bo tròn của nút
-                ),
-                shadowColor: Colors.grey,
-                elevation: 6,
-                foregroundColor: Colors.white,
-                backgroundColor: check ? Colors.green : Colors.red,
-                minimumSize: const Size(double.infinity, 50),
-              ),
+            ButtonCheck(
+             
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
               },
-              child: Text('Tiếp tục'.toUpperCase()),
+              text: 'Tiếp tục',
+              type: !check ? typeButtonCheckDialog:typeButtonCheck ,
             )
           ],
         ),
