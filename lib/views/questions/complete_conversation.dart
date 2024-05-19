@@ -5,9 +5,9 @@ import 'package:maple/helper/audio_helper.dart';
 import 'package:maple/utils/constants.dart';
 
 class CompleteConversation extends StatefulWidget {
-  final String question;
+  final Map<String, String> question;
   final List<String> items;
-  final String correctAnswer;
+  final Map<String, String> correctAnswer;
 
   const CompleteConversation(
       {super.key,
@@ -45,7 +45,7 @@ class _CompleteConversationState extends State<CompleteConversation> {
               ),
               Align(
                   alignment: Alignment.centerLeft,
-                  child: MessageQuestion(question: widget.question)),
+                  child: MessageQuestion(question: widget.question['text']!)),
               const SizedBox(
                 height: 20,
               ),
@@ -87,7 +87,8 @@ class _CompleteConversationState extends State<CompleteConversation> {
               ButtonCheck(
                 enable: selectedIndex != -1,
                 onPressed: () {
-                  if (widget.items[selectedIndex] == widget.correctAnswer) {
+                  if (widget.items[selectedIndex] ==
+                      widget.correctAnswer['text']) {
                     AudioHelper.playSound("correct");
                     showResultDialog("Chính xác!", true);
                   } else {
@@ -140,28 +141,25 @@ class _CompleteConversationState extends State<CompleteConversation> {
                 ),
               ],
             ),
-            !check
-                ? Align(
+             Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Trả lời đúng",
+                      !check ? "Trả lời đúng": "Dịch nghĩa:",
                       style: TextStyle(
                           color: check ? Colors.green : Colors.red,
                           fontSize: 18,
                           fontWeight: FontWeight.bold),
                     ))
-                : const SizedBox(),
-            !check
-                ? Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      widget.correctAnswer,
-                      style: TextStyle(
-                        color: check ? Colors.green : Colors.red,
-                        fontSize: 16,
-                      ),
-                    ))
-                : const SizedBox(),
+                ,
+            Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  !check ? widget.correctAnswer['text']! : "${widget.question['mean']!}"+"\n"+"${widget.correctAnswer['mean']!}",
+                  style: TextStyle(
+                    color: check ? Colors.green : Colors.red,
+                    fontSize: 16,
+                  ),
+                )),
             const SizedBox(height: 20),
             ButtonCheck(
               type: check ? typeButtonCheck : typeButtonCheckDialog,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:maple/utils/constants.dart';
+import 'package:maple/views/questions/answers_card.dart';
 import 'package:maple/views/questions/complete_conversation.dart';
 import 'package:maple/views/questions/image_card_check.dart';
 import 'package:maple/views/questions/listening_screen.dart';
@@ -9,6 +10,7 @@ import 'package:maple/views/questions/speech_check.dart';
 import 'package:maple/views/questions/background_decoration.dart';
 import 'package:maple/views/questions/transerlationscreen.dart';
 import 'package:maple/views/questions/translation_view.dart';
+
 
 class QuestionsScreen extends StatelessWidget {
   final List<Map<String, String>> items = [
@@ -22,7 +24,7 @@ class QuestionsScreen extends StatelessWidget {
     {'image': 'images/gem.png', 'text': 'sô-cô-la', 'mean': 'socola'},
   ];
   final List<String> itemsConversation = [
-    'Yes, it\'s next to the big university.',
+    'Yes, He is Tommy',
     'Yes, that\'s my younger brother.',
   ];
   final List<String> itemsWord = [
@@ -40,6 +42,9 @@ class QuestionsScreen extends StatelessWidget {
     {'mean': 'màu vàng', 'text': 'yellow'}, 
     {'text': 'kem', 'mean': 'ice cream'},
   ];
+  //final List<String> itemsTranslate =['Hello']
+  final Map<String,String> questionConversation = {'text':'Is that boy your brother, Lisa?','mean':'Đây là bạn trai của con có phải không Lisa?'};
+    final Map<String,String> correctAnswerConversation = {'text':'Yes, He is Tommy','mean':'Vâng, Anh ấy là Tommy'};
   QuestionsScreen({super.key});
   static String routeName = "/questionScreen";
 
@@ -102,24 +107,27 @@ class QuestionsScreen extends StatelessWidget {
           ),
         ),
       ),
-      body:  const BackgroundDecoration(
+      body:    BackgroundDecoration(
         child: Center(
-            child:
-           /* 
+            child:  CompleteConversation(question: questionConversation, items: itemsConversation,correctAnswer: correctAnswerConversation)  /*
+                
+           TranslationScreen(answers: ['Hello',"What's",'your','have','am','name?',], question: "Hello, What's your name?", mean:"Xin chào, tên bạn là gì?", type: transerlateRead,)
+       
            MatchingPairScreen(items: itemMatchPair,type:matchingword)
-
            ListenScreen(
           items: itemsWord,
           correctAnswer: 'Flow',)  
           
           CompleteConversation(question:  'Is that boy your brother, Lisa?', items: itemsConversation,correctAnswer: 'Yes, it\'s next to the big university.')
-           ImageSelectionScreen(expectedWord: 'ice cream', correctAnswer: 'kem', items:items ,)
-            PronunciationCheckView( sampleText: "Hello, What's your name?",),
-  TranselateView(expectedSentence: 'Vâng, tôi muốn hai chiếc Pizza', missingSentence: 'Yes,I would like to ', correctanswers: 'pizzas',)
-          */ //DONE
-
            
-            CardAnswer(
+           ImageSelectionScreen(expectedWord: 'ice cream', correctAnswer: 'kem', items:items ,)
+             
+         PronunciationCheckView( sampleText: "Hello, What's your name?", mean: 'Xin chào, Bạn tên gì?',),
+                
+            
+  TranselateView(expectedSentence: 'Vâng, tôi muốn hai chiếc Pizza', missingSentence: 'Yes,I would like to ', correctanswers: 'pizzas',)
+        
+         CardAnswer(
                 question: "hodhfishfisdjofsoidfois jofojsdofjsoi",
                 correctAnswer: "hello",
                 answers: [
@@ -128,7 +136,10 @@ class QuestionsScreen extends StatelessWidget {
               "good",
               "too much"
             ])
-                 /*  
+           */ //DONE
+
+           
+                   /*  
            
            
               */ /* */
@@ -138,205 +149,3 @@ class QuestionsScreen extends StatelessWidget {
   }
 }
 
-class CardAnswer extends StatefulWidget {
-  final String question;
-  final String correctAnswer;
-  final List<String> answers;
-
-  const CardAnswer(
-      {super.key,
-      required this.question,
-      required this.correctAnswer,
-      required this.answers});
-
-  @override
-  // ignore: library_private_types_in_public_api
-  _CardAnswerState createState() => _CardAnswerState();
-}
-
-class _CardAnswerState extends State<CardAnswer> {
-  String? selectedAnswer;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.only(top: 10, bottom: 16),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Chọn bản dịch đúng",
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                ),
-                Center(
-                  child: SizedBox(
-                    width: 250,
-                    child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 15),
-                        margin: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          border:
-                              Border.all(color: Colors.grey[300]!, width: 2),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.volume_up,
-                              color: Colors.blue,
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                                child: Center(
-                              child: Text(
-                                widget.question,
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                            )),
-                          ],
-                        )),
-                  ),
-                )
-              ],
-            ),
-            const Spacer(),
-            // Danh sách các đáp án
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: widget.answers.map((answer) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          selectedAnswer = answer; // Lưu đáp án được chọn
-                        });
-                      },
-                      style: ButtonStyle(
-                          backgroundColor: selectedAnswer == answer
-                              ? MaterialStateProperty.all<Color>(
-                                  Colors.blue) // Thay đổi màu nền khi được chọn
-                              : null, // Màu nền của nút
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  10.0), // Bán kính bo góc
-                            ),
-                          ),
-                          padding:
-                              MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            const EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal:
-                                    24), // Khoảng cách giữa nội dung và viền
-                          ),
-                          elevation: MaterialStateProperty.all(4)),
-                      child: Text(
-                        answer,
-                        style: TextStyle(
-                            color: selectedAnswer == answer
-                                ? Colors.white
-                                : Colors.black,
-                            fontSize: 16),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                );
-              }).toList(),
-            ),
-
-            const Spacer(),
-
-            // Nút kiểm tra đáp án
-            ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: selectedAnswer != null
-                    ? MaterialStateProperty.all<Color>(Colors.green)
-                    : null, // Màu nền của nút
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0), // Bán kính bo góc
-                  ),
-                ),
-                padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                  const EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 24), // Khoảng cách giữa nội dung và viền
-                ),
-              ),
-              onPressed: selectedAnswer != null
-                  ? () {
-                      if (selectedAnswer == widget.correctAnswer) {
-                        // Hiển thị thông báo đáp án đúng
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: const Text('Correct Answer'),
-                            content: const Text(
-                                'Congratulations! Your answer is correct.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context); // Đóng hộp thoại
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        // Hiển thị thông báo đáp án sai
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: const Text('Incorrect Answer'),
-                            content:
-                                const Text('Sorry! Your answer is incorrect.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context); // Đóng hộp thoại
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                    }
-                  : null,
-              child: Center(
-                  child: Text(
-                'Kiểm tra',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: selectedAnswer != null ? Colors.white : Colors.black,
-                ),
-              )),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

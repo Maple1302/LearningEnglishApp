@@ -7,7 +7,8 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class PronunciationCheckView extends StatefulWidget {
   final String sampleText;
-  const PronunciationCheckView({super.key, required this.sampleText});
+  final String mean;
+  const PronunciationCheckView({super.key, required this.sampleText, required this.mean});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -119,6 +120,7 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
               ),
               const SizedBox(height: 20),
               ButtonCheck(
+                enable: _userText!="",
                 onPressed: _evaluatePronunciation,
               ),
             ],
@@ -194,7 +196,7 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
     if (standards) {
       AudioHelper.playSound('correct');
       _showResultDialog(
-          "Rất giỏi! Dịch Nghĩa:\n" "Xin chào, Bạn tên gì?", true);
+          "Rất giỏi! Dịch Nghĩa:\n${widget.mean}", true);
     } else {
       AudioHelper.playSound('incorrect');
       _showResultDialog('Có vẻ không đúng, thử lại lần nữa nhé', false);
@@ -238,7 +240,7 @@ class _PronunciationCheckViewState extends State<PronunciationCheckView> {
                     message,
                     style: TextStyle(
                         color: check ? Colors.green : Colors.red,
-                        fontSize: 16,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold),
                   ),
                 ),
