@@ -51,7 +51,6 @@ class MyHome extends StatelessWidget {
           '/': (context) =>const SignInView(), // Màn hình đăng nhập là màn hình mặc định       
           '/home': (context) => const Home(),
           '/signup': (context) => const SignUpView(),
-          '/speechcheck':(context) => const PronunciationCheckView(sampleText: '',mean: '',),
           '/hearingcheck':(context) =>  const HearingCheckView(),
           QuestionsScreen.routeName:(context) => QuestionsScreen(),
         },

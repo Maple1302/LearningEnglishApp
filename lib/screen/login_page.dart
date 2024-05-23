@@ -48,9 +48,31 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _userInfor() {
-    return Center(
-      child: Column(
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: CustomPaint(
+                painter: BackgroundPainter(),
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.1),
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         

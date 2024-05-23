@@ -18,13 +18,6 @@ class AuthViewModel extends ChangeNotifier {
   UserModel? _currentUser;
   UserModel? get currentUser => _currentUser;
   bool _isLoading = false;
-  AuthViewModel(){
-   authStateChangesWithModel?.listen((user) {
-    _currentUser = user;
-   });
-  }
-  
-
   bool get isLoading => _isLoading;
 
   final _emailSubject = BehaviorSubject<String>();
