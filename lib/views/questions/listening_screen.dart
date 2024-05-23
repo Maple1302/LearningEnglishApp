@@ -6,9 +6,10 @@ import 'package:maple/utils/constants.dart';
 class ListenScreen extends StatefulWidget {
   final String correctAnswer;
   final List<String> items;
+   final Function(bool,int) onAnswer;
 
   const ListenScreen(
-      {super.key, required this.items, required this.correctAnswer});
+      {super.key, required this.items, required this.correctAnswer, required this.onAnswer});
 
   @override
   State<ListenScreen> createState() => _ListenScreenState();
@@ -16,18 +17,30 @@ class ListenScreen extends StatefulWidget {
 
 class _ListenScreenState extends State<ListenScreen> {
   int selectedIndex = -1;
+  int score =3;
+   @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+
+  @override
+  void didUpdateWidget(ListenScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.correctAnswer != widget.correctAnswer) {
+      // Reset lại dữ liệu khi type thay đổi
+      _initializeData();
+    }
+  }
+
+  void _initializeData() {
+     selectedIndex = -1;
+    AudioHelper.speak(widget.correctAnswer);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-        elevation: 4,
-        margin: const EdgeInsets.only(top: 10, bottom: 16),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-        ),
-        child: Padding(
+    return Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -102,7 +115,7 @@ class _ListenScreenState extends State<ListenScreen> {
               ),
             ],
           ),
-        ));
+        );
   }
 
   void showResultDialog(String message, bool check) {
@@ -170,6 +183,7 @@ class _ListenScreenState extends State<ListenScreen> {
             ButtonCheck(
              
               onPressed: () {
+                 widget.onAnswer(check,score);
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
               },
               text: 'Tiếp tục',

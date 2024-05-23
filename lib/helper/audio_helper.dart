@@ -19,6 +19,12 @@ class AudioHelper {
       case 'fail':
         source = 'sounds/fail.mp3';
         break;
+      case 'bounus':
+        source = 'sounds/game-bonus.mp3';
+        break;
+      case 'success':
+        source = 'sounds/success-effect.mp3';
+        break;
       // Thêm các trường hợp khác cần xử lý
       default:
         // Xử lý mặc định nếu không có trường hợp nào khớp

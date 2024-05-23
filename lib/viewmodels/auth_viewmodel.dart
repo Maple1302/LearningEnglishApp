@@ -1,42 +1,47 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:maple/helper/vaildation.dart';
+import 'package:maple/responsitories/auth_responsitory.dart';
+import 'package:maple/models/user_model.dart';
 import 'package:rxdart/rxdart.dart';
 
-import 'package:maple/helper/vaildation.dart';
-import 'package:maple/models/usermodel.dart';
-import 'package:maple/responsitory/auth_responsitory.dart';
-
-class AuthViewModel extends ChangeNotifier {
- final AuthRepository _authRepository = AuthRepository();
-
+class AuthViewModel with ChangeNotifier {
+  final AuthRepository _authRepository = AuthRepository();
   Stream<UserModel>? get authStateChangesWithModel =>
       _authRepository.authStateChangesWithModel;
-  User? user;
-  UserModel? _currentUser;
-  UserModel? get currentUser => _currentUser;
+  UserModel? _user;
+  String? errorMessage;
+  bool _isLoggedIn = false;
+  UserModel? get user => _user;
+  bool get isLoggedIn => _isLoggedIn;
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   final _emailSubject = BehaviorSubject<String>();
   final _passwordSubject = BehaviorSubject<String>();
+  final _passwordConfirmSubject = BehaviorSubject<String>();
   final _btnLoginSubject = BehaviorSubject<bool>();
   final _btnSignUpSubject = BehaviorSubject<bool>();
+  final _btnResetPasswordSubject = BehaviorSubject<bool>();
   final _usernameSubject = BehaviorSubject<String>();
 
   // Stream getters
   Stream<String> get emailStream => _emailSubject.stream;
   Stream<String> get passwordStream => _passwordSubject.stream;
+  Stream<String> get passwordconfirmStream => _passwordConfirmSubject.stream;
   Stream<bool> get btnLoginStream => _btnLoginSubject.stream;
+  Stream<bool> get btnResetPasswordStream => _btnResetPasswordSubject.stream;
   Stream<bool> get btnSignUpStream => _btnSignUpSubject.stream;
   Stream<String> get usernameStream => _usernameSubject.stream;
 
   // Sink getters
   Function(String) get changeEmail => _emailSubject.sink.add;
   Function(String) get changePassword => _passwordSubject.sink.add;
+  Function(String) get changePasswordConfirm =>
+      _passwordConfirmSubject.sink.add;
   Function(bool) get changeSignUpbtn => _btnLoginSubject.sink.add;
+  Function(bool) get changeResetPasswordbtn =>
+      _btnResetPasswordSubject.sink.add;
   Function(String) get changeUsername => _usernameSubject.sink.add;
   Function(bool) get changebtnSignUp => _btnSignUpSubject.sink.add;
 
@@ -45,6 +50,8 @@ class AuthViewModel extends ChangeNotifier {
       _emailSubject.stream.map((email) => Validation().validateEmail(email));
   Stream<String?> get isPasswordValid => _passwordSubject.stream
       .map((password) => Validation().validatePassword(password));
+  Stream<String?> get isPasswordMatched => _passwordConfirmSubject.stream
+      .map((password) => Validation().validatePassword(password));
   Stream<String?> get isUserNameValid => _usernameSubject.stream
       .map((username) => Validation().validateUsername(username));
 
@@ -52,6 +59,7 @@ class AuthViewModel extends ChangeNotifier {
       Rx.combineLatest([isEmailValid], (List<Object?> emailValid) {
         return emailValid.first == null;
       });
+
   Stream<bool> get isButtonSignUpEnabled => Rx.combineLatest3(
         isEmailValid,
         isPasswordValid,
@@ -61,7 +69,7 @@ class AuthViewModel extends ChangeNotifier {
             passwordValid == null &&
             userNameValid == null,
       );
-  // Dispose
+
   @override
   void dispose() {
     super.dispose();
@@ -72,86 +80,145 @@ class AuthViewModel extends ChangeNotifier {
     _usernameSubject.close();
   }
 
-  Future<void> signInWithEmailAndPassword(
-      String email, String password, BuildContext context) async {
-    try {
-      _currentUser = null;
-      _isLoading = true;
-      notifyListeners();
-      final user =
-          await _authRepository.signInWithEmailAndPassword(email, password);
+  AuthViewModel() {
+     _isLoading = true;
+    notifyListeners();
+    authStateChangesWithModel?.listen((event) {
+      _user = event;
+      _isLoggedIn = _user != null;
       _isLoading = false;
       notifyListeners();
-      if (user != null) {
-        if (_authRepository.noti != "") {
-          // ignore: use_build_context_synchronously
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(_authRepository.noti)));
-          _currentUser = null;
-        } else {
-          _currentUser = user;
-        }
+    });
+    
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      _user = await _authRepository.signInWithGoogle();
+      _isLoading = false;
+      errorMessage = null;
+      // On success:
+      _isLoggedIn = true;
+    } catch (e) {
+      _isLoading = false;
+    }
+    notifyListeners();
+  }
+
+  Future<void> signInWithEmail(String email, String password) async {
+    try {
+      _isLoading = true;
+
+      _user = await _authRepository.signInWithEmail(email, password);
+
+      if (_user != null) {
+        errorMessage = null;
+        // On success:
+        _isLoggedIn = true;
+        notifyListeners();
+      }
+
+      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = "Người dùng không tồn tại!";
+
+          break;
+        case 'wrong-password':
+          errorMessage = "Mật khẩu sai!";
+          break;
+        default:
+          errorMessage = "Lỗi không xác định. Vui lòng thử lại sau!";
+          break;
+      }
+    } catch (e) {
+      switch (e) {
+        case 'email-not-verified':
+          errorMessage =
+              "Email chưa được xác thực.\nVui lòng xác thực email trước khi đăng nhập!";
+          _isLoggedIn = false;
+          _user = null;
+          await _authRepository.signOut();
+          break;
+        case 'user-not-found':
+          _isLoggedIn = false;
+          _user = null;
+      }
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> registerWithEmail(
+      String email, String password, String userName) async {
+    try {
+      _isLoading = true;
+      _user =
+          await _authRepository.registerWithEmail(email, password, userName);
+      if (_authRepository.notification != '') {
+        errorMessage = _authRepository.notification;
+      }
+      errorMessage = null;
+      _isLoading = false;
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'email-already-in-use':
+          errorMessage = "Email này đã được sử dụng bởi tài khoản khác!";
+          break;
+        case 'weak-password':
+          errorMessage = "Mật khẩu quá ngắn!";
+          break;
+        default:
+          errorMessage = "Lỗi không xác định!";
+          break;
+      }
+      _isLoading = false;
+    } catch (e) {
+      switch (e) {
+        case 'user-not-found':
+          _isLoggedIn = false;
+          _user = null;
+      }
+    }
+    notifyListeners();
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      _isLoading = true;
+      await _authRepository.resetPassword(email);
+      _isLoading = false;
+      if (_authRepository.notification != '') {
+        errorMessage = _authRepository.notification;
       } else {
-        _currentUser = null;
+        errorMessage =
+            "Email reset mật khẩu đã được gửi!\nVui lòng kiểm tra email để đặt lại mật khẩu!";
       }
     } on FirebaseAuthException catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      errorMessage = e.toString();
     }
+    notifyListeners();
   }
 
-  Future registerWithEmailAndPassword(String email, String password,
-      String username, BuildContext context) async {
+  Future<void> signOut() async {
     try {
-      _currentUser = null;
       _isLoading = true;
-      notifyListeners();
-      await _authRepository.registerWithEmailAndPassword(
-          email, password, username);
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(_authRepository.noti)));
-      // _currentUser = user;
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
-    }
-  }
-
-  Future signInWithGoogleAccount(BuildContext context) async {
-    try {
-      _currentUser = null;
-      _isLoading = true;
-      final user = await _authRepository.signInWithGoogleAccount();
-     
-      _currentUser = user;
-      _isLoading = false;
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
-    }
-  }
-
-  Future<void> signOut(BuildContext context) async {
-    try {
-      _currentUser = null;
-      _isLoading = true;
-      notifyListeners();
       await _authRepository.signOut();
       _isLoading = false;
+      _user = null;
+      errorMessage = null;
+      _isLoggedIn = false;
       notifyListeners();
     } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
+      switch (e) {
+        case 'user-not-found':
+          _isLoggedIn = false;
+          _user = null;
+      }
+      _isLoading = false;
     }
   }
 }

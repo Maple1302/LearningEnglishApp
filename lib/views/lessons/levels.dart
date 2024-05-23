@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:maple/views/home/home.dart';
+import 'package:maple/views/questions/questions_screen.dart';
 
 class Levels extends StatefulWidget {
   const Levels({super.key});
@@ -15,20 +16,17 @@ class _LevelsState extends State<Levels> {
   int countRight = 0;
   int count = 3;
   List<Widget> listLesson = [];
-  
+
   @override
   void initState() {
     super.initState();
     listLesson = customListLesson(getListLesson());
   }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        
-        body: topic(listLesson));
+    return Scaffold(body: topic(listLesson));
   }
-
-  
 
   static Widget columnLesson(List<Widget> list) {
     return Row(
@@ -76,26 +74,27 @@ class _LevelsState extends State<Levels> {
                         ),
                       ),
                       ElevatedButton(
-            style: ButtonStyle(
-              padding: MaterialStateProperty.all(
-                  EdgeInsets.zero), // Xác định padding
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HomePage()),
-              );
-            },
-            child:CircleAvatar(
-                        backgroundColor: color,
-                        radius: 35,
-                        //backgroundImage: AssetImage('images/easter-egg_colorful.png'),
-                        child: Image.asset(
-                          image,
-                          height: 50,
-                        ),
-                      )),
+                          style: ButtonStyle(
+                            padding: MaterialStateProperty.all(
+                                EdgeInsets.zero), // Xác định padding
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          onPressed: () {
+                           WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                      Navigator.pushReplacementNamed(
+                                          context,QuestionScreen.routeName);
+                                    });
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: color,
+                            radius: 35,
+                            //backgroundImage: AssetImage('images/easter-egg_colorful.png'),
+                            child: Image.asset(
+                              image,
+                              height: 50,
+                            ),
+                          )),
                     ],
                   ),
                   Stack(

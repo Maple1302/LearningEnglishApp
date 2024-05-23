@@ -63,6 +63,9 @@ dependencies:
   font_awesome_flutter: ^10.7.0
   wave: ^0.2.2
   flutter_color: ^2.1.0
+  flutter_fft: ^1.0.2+6
+  firebase_analytics: ^10.10.5
+  flutter_secure_storage: ^9.2.1
   
 
 dev_dependencies:
@@ -111,10 +114,20 @@ flutter:
      - images/NPC_Character.png
      - images/NPC_Character1.png
      - images/turtle-icon.png
+     - images/score_icon.png
+     - images/clock_icon.png
+     - images/target_icon.png
+     - images/faster_icon.png
+     - images/streak_3.png
+     - images/streak_5.png
+     - images/streak_10.png
+     - images/streak_20.png
+     - assets/sounds/success-effect.mp3
      - assets/sounds/correct_answer.mp3
      - assets/sounds/wrong_answer.mp3
      - assets/sounds/fail.mp3
      - assets/sounds/error.mp3
+     - assets/sounds/game-bonus.mp3
      
 
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_color/flutter_color.dart';
 
 
-const completedLesson = "completedLesson";
+const completedLessons = "completedLessons";
 const email = "email";
 const process = "process";
 const userName = "username";
@@ -19,6 +19,7 @@ const specifyPassword = "password cần ít nhất 1 ký tự thường,hoa,số
 const emailEmpty = "Vui lòng nhập email";
 const passwordEmpty = "Vui lòng nhập password";
 const unauthenticatedEmail = "Email chưa được xác thực";
+const emailNotFound = "Email này chưa đăng ký tài khoản";
 //notification
 const emailVerificationSent = "Email xác thực đã được gửi";
 
@@ -57,3 +58,14 @@ const matchingword = "matchingword";
 const matchingsound = "matchingsound";
 const transerlateRead = "transerlateRead";
 const transerlateListen = "transerlateListen";
+
+const completeConversationQuestion = "CCQ";
+const transerlationReadQueston = "TRQ";
+const transerlationListenQueston = "TLQ";
+const matchingPairWordQuestion = "MPWQ";
+const matchingPairSoundQuestion = "MPSQ";
+const listenQuestion = "LQ";
+const imageSelectionQuestions = "ISQ";
+const pronunciationQuestion = "PQ";
+const completeMissingSentenceQuestion = "CMSQ";
+const cardMutilChoiceQuestion = "CMCQ";

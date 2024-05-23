@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:maple/utils/constants.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_fft/flutter_fft.dart';
 
 class PressableButton extends StatefulWidget {
   final Color sideColor;
@@ -208,5 +210,120 @@ class _ButtomItemReplaceState extends State<ButtomItemReplace> {
       sideBottomWidth: 5,
       child: widget.child,
     );
+  }
+}
+
+
+
+class AudioButton extends StatefulWidget {
+  const AudioButton({Key? key}) : super(key: key);
+
+  @override
+  _AudioButtonState createState() => _AudioButtonState();
+}
+
+class _AudioButtonState extends State<AudioButton> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  late FlutterFft _flutterFft;
+  List<double> _frequencies = [];
+  bool _isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _flutterFft = FlutterFft();
+    _initFft();
+  }
+
+  Future<void> _initFft() async {
+    await _flutterFft.startRecorder();
+    _flutterFft.onRecorderStateChanged.listen((data) {
+      if ( data.isNotEmpty) {
+        setState(() {
+          _frequencies = data as List<double>;
+        });
+      }
+    });
+  }
+
+  void _toggleAudio() async {
+    if (_isPlaying) {
+      await _audioPlayer.stop();
+      _flutterFft.stopRecorder();
+    } else {
+      await _audioPlayer.play('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' as Source);
+      _flutterFft.startRecorder();
+    }
+    setState(() {
+      _isPlaying = !_isPlaying;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _toggleAudio,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.grey),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+              color: Colors.blue,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: CustomPaint(
+                painter: WaveformPainter(_frequencies),
+                child: const SizedBox(height: 24),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    _flutterFft.stopRecorder();
+    super.dispose();
+  }
+}
+
+class WaveformPainter extends CustomPainter {
+  final List<double> frequencies;
+  WaveformPainter(this.frequencies);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.fill;
+
+    if (frequencies.isEmpty) return;
+
+    double maxFreq = frequencies.reduce((a, b) => a > b ? a : b);
+    double minFreq = frequencies.reduce((a, b) => a < b ? a : b);
+    double range = maxFreq - minFreq;
+
+    for (int i = 0; i < frequencies.length; i++) {
+      final x = i * size.width / frequencies.length;
+      final height = (frequencies[i] - minFreq) / range * size.height;
+      final y = size.height - height;
+      canvas.drawRect(Rect.fromLTWH(x, y, size.width / frequencies.length, height), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }

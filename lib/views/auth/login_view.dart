@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_color/flutter_color.dart';
 import 'package:maple/views/auth/reset_password_view.dart';
-import 'package:maple/views/home/home.dart';
 import 'package:provider/provider.dart';
 import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginViewState extends State<LoginView> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
   final TextEditingController _emailController = TextEditingController();
@@ -35,9 +34,9 @@ class _LoginPageState extends State<LoginPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (authViewModel.isLoggedIn) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const Home()),
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/home');
+      });
       }
     });
 
@@ -47,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
       });
     }
 
-    Future<void> showMyDialog( String message) async {
+    Future<void> showMyDialog(String message) async {
       return showDialog<void>(
         context: context,
         barrierDismissible: false,
@@ -74,38 +73,37 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
 
-   Widget googleSignInButton() {
-  return Center(
-    child: SizedBox(
-      height: 55,
-      width: double.infinity, // Set chiều rộng là không giới hạn
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: SignInButton(
-          Buttons.google,
-          text: "Đăng nhập với Google",
-          onPressed: () async {
-            await authViewModel.signInWithGoogle();
-            if (authViewModel.user != null) {
-              goToHomePage();
-            }
-          },
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: const BorderSide(
-              color: Colors.blue,
-              width: 3,
+    Widget googleSignInButton() {
+      return Center(
+        child: SizedBox(
+          height: 55,
+          width: double.infinity, // Set chiều rộng là không giới hạn
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: SignInButton(
+              Buttons.google,
+              text: "Đăng nhập với Google",
+              onPressed: () async {
+                await authViewModel.signInWithGoogle();
+                 if (authViewModel.user != null) {
+                  goToHomePage();
+                } 
+              },
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: const BorderSide(
+                  color: Colors.blue,
+                  width: 3,
+                ),
+              ),
             ),
           ),
         ),
-      ),
-    ),
-  );
-}
-
+      );
+    }
 
     return Scaffold(
       body: Stack(
@@ -144,7 +142,6 @@ class _LoginPageState extends State<LoginPage> {
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
                         fontStyle: FontStyle.italic,
-                        
                       ),
                     ),
                     const Spacer(),
@@ -237,12 +234,13 @@ class _LoginPageState extends State<LoginPage> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {    WidgetsBinding.instance
-                                              .addPostFrameCallback((_) {
-                                            Navigator.pushReplacementNamed(
-                                                context, ResetPasswordView.routeName);
-                                          });
-                        showMyDialog( authViewModel.errorMessage!);},
+                        onPressed: () {
+                          WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                      Navigator.pushReplacementNamed(
+                                          context, ResetPasswordView.routeName);
+                                    });
+                        },
                         child: const Text(
                           'Quên mật khẩu?',
                           style: TextStyle(color: Colors.white),
@@ -264,8 +262,7 @@ class _LoginPageState extends State<LoginPage> {
                                         email, password);
                                     if (authViewModel.errorMessage != null) {
                                       // ignore: use_build_context_synchronously
-                                      showMyDialog(
-                                           authViewModel.errorMessage!);
+                                      showMyDialog(authViewModel.errorMessage!);
                                     } else if (authViewModel.user != null) {
                                       goToHomePage();
                                     }
@@ -278,41 +275,50 @@ class _LoginPageState extends State<LoginPage> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: const Text('Đăng nhập với email',style: TextStyle(fontSize: 15),),
+                            child: const Text(
+                              'Đăng nhập với email',
+                              style: TextStyle(fontSize: 15),
+                            ),
                           ),
                         );
                       },
                     ),
-                    
+
                     Visibility(
-                      visible: !isKeyboardOpen,
-                      child:Column(children: [ const Row(
-                            textBaseline: TextBaseline.alphabetic,
-                            children: <Widget>[
-                              Expanded(
-                                child: Divider(
-                                  thickness: 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Text(
-                                  "Hoặc",
-                                  style: TextStyle(
-                                    fontSize: 18,
+                        visible: !isKeyboardOpen,
+                        child: Column(
+                          children: [
+                            const Row(
+                              textBaseline: TextBaseline.alphabetic,
+                              children: <Widget>[
+                                Expanded(
+                                  child: Divider(
+                                    thickness: 0.5,
                                     color: Colors.white,
                                   ),
                                 ),
-                              ),
-                              Expanded(
-                                child: Divider(
-                                  thickness: 0.5,
-                                  color: Colors.white,
+                                Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: Text(
+                                    "Hoặc",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ), googleSignInButton()],) ),
+                                Expanded(
+                                  child: Divider(
+                                    thickness: 0.5,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            googleSignInButton()
+                          ],
+                        )),
                     const Spacer(),
                     Visibility(
                       visible: !isKeyboardOpen,
@@ -324,11 +330,13 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text.rich(
                             TextSpan(
                               text: "Bạn chưa có tài khoản? ",
-                              style: const TextStyle(color: Colors.black,fontSize: 16),
+                              style: const TextStyle(
+                                  color: Colors.black, fontSize: 16),
                               children: [
                                 TextSpan(
                                   text: 'Đăng ký',
-                                  style: const TextStyle(color: Colors.white,fontSize: 16),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 16),
                                   onEnter: (event) {
                                     WidgetsBinding.instance
                                         .addPostFrameCallback((_) {

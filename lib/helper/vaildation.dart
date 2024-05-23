@@ -18,6 +18,15 @@ class Validation {
     }
     return regex.hasMatch(value) ? null : passwordInvalid;
   }
+  String? validateConfirmPassword(String password,String passwordConfirm) {
+  
+    if (password != passwordConfirm) {
+      return 'Mật khẩu không trùng khớp';
+    }
+      return null;
+    
+    
+  }
   String? validateUsername(String username) {
   // Kiểm tra xem tên người dùng có hợp lệ không
   // Theo các quy tắc sau:

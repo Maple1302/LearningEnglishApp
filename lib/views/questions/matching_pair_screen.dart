@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 
 import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
-
-import 'package:flutter_color/flutter_color.dart';
 import 'package:maple/utils/constants.dart';
 
 class MatchingPairScreen extends StatefulWidget {
   final List<Map<String, String>> items;
   final String type;
+  final Function(bool,int) onAnswer;
 
   const MatchingPairScreen({
     super.key,
     required this.items,
     required this.type,
+    required this.onAnswer,
   });
 
   @override
@@ -29,19 +29,40 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
   int selectedIndexRight = -1; // -1 means no item is selected
   bool enableButton = false;
   int selectAnswer = -1;
+  int score = 3;
+
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+
+  @override
+  void didUpdateWidget(MatchingPairScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.items != widget.items) {
+      // Reset lại dữ liệu khi type thay đổi
+      _initializeData();
+    }
+  }
+
+  void _initializeData() {
+    answerSelectedLeft = '';
+    answerSelectedRight = '';
+    visibility = List.generate(widget.items.length, (index) => true);
+    count = 0;
+    selectedIndexLeft = -1; // -1 means no item is selected
+    selectedIndexRight = -1; // -1 means no item is selected
+    enableButton = false;
+    selectAnswer = -1;
+    
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-        color: HexColor("#fffffd"),
-        elevation: 4,
-        margin: const EdgeInsets.only(top: 10, bottom: 16),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-        ),
-        child: Column(
+    return 
+         Column(
           children: [
             const Padding(
               padding: EdgeInsets.all(16.0),
@@ -63,9 +84,20 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
                 itemBuilder: (context, index) {
                   return Visibility(
                       visible: visibility[index],
-                      maintainState: true,
-                      maintainAnimation: true,
-                      maintainSize: true,
+                      replacement:  ButtonItems(
+                        onPressed: () {
+                          
+                        },
+                        enable: false,
+                        checked: false,
+                        child: (widget.type == matchingsound && index % 2 == 0)
+                            ?  Center(
+                                child: Icon(Icons.volume_up,
+                                    size: 40, color: buttonCheckDisableSideColor),
+                              )
+                            : Text(capitalize(widget.items[index]['text']!),
+                                style:  TextStyle(fontSize: 16,color: buttonCheckDisableSideColor)),
+                      ),
                       child: ButtonItems(
                         onPressed: () {
                           setState(() {
@@ -91,6 +123,7 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
                                 count += 2;
                                 if (count == widget.items.length) {
                                   showResultDialog("Tuyệt vời!", true);
+
                                   enableButton = true;
                                 } else {
                                   showResultDialog("Chính xác!", true);
@@ -100,6 +133,7 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
 
                                 AudioHelper.playSound("correct");
                               } else {
+                                score = score > 0 ? score -1 : 0;
                                 showResultDialog("Không chính xác!", false);
                                 AudioHelper.playSound("incorrect");
                                 selectedIndexLeft = -1;
@@ -128,7 +162,7 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
                   onPressed: () {},
                 )),
           ],
-        ));
+        );
   }
 
   void showResultDialog(String message, bool check) {
@@ -198,6 +232,9 @@ class _MatchingPairScreenState extends State<MatchingPairScreen> {
             ButtonCheck(
               text: "Tiếp tục",
               onPressed: () {
+                if (message == "Tuyệt vời!") {
+                    widget.onAnswer(check,score);
+                }
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
               },
               type: !check ? typeButtonCheckDialog : typeButtonCheck,

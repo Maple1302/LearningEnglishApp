@@ -4,37 +4,35 @@ import 'package:maple/helper/audio_helper.dart';
 import 'package:maple/utils/constants.dart';
 
 
-class CardAnswer extends StatefulWidget {
+class CardAnswerScreen extends StatefulWidget {
   final String question;
   final String correctAnswer;
   final List<String> answers;
+  final Function(bool,int) onAnswer; 
 
-  const CardAnswer(
+   const CardAnswerScreen(
       {super.key,
       required this.question,
       required this.correctAnswer,
-      required this.answers});
+      required this.answers,required this.onAnswer, });
+  
 
   @override
   // ignore: library_private_types_in_public_api
-  _CardAnswerState createState() => _CardAnswerState();
+  _CardAnswerScreenState createState() => _CardAnswerScreenState();
 }
 
-class _CardAnswerState extends State<CardAnswer> {
-  String selectedAnswer='';
-
+class _CardAnswerScreenState extends State<CardAnswerScreen> {
+ String selectedAnswer = '';
+ int score =3;
+  @override
+  void initState(){
+    super.initState();    
+  }
+  void reset(){selectedAnswer = '';}
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.only(top: 10, bottom: 16),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-      ),
-      child: Padding(
+    return Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,7 +128,7 @@ class _CardAnswerState extends State<CardAnswer> {
             ),
           ],
         ),
-      ),
+      
     );
   }
   void showResultDialog(String message, bool check) {
@@ -198,6 +196,9 @@ class _CardAnswerState extends State<CardAnswer> {
             ButtonCheck(
               type: check ? typeButtonCheck : typeButtonCheckDialog,
               onPressed: () {
+
+                widget.onAnswer(check,score);
+                reset();
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
               },
               text: "tiếp tục",
