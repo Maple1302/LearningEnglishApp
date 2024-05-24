@@ -19,7 +19,7 @@ const specifyPassword = "password cần ít nhất 1 ký tự thường,hoa,số
 const emailEmpty = "Vui lòng nhập email";
 const passwordEmpty = "Vui lòng nhập password";
 const unauthenticatedEmail = "Email chưa được xác thực";
-const emailNotFound = "Email này chưa đăng ký tài khoản\n hoặc phải đã được sử dụng để đăng nhập với phương thức khác";
+const emailNotFound = "Email này chưa đăng ký tài khoản\n Hoặc phải đã được sử dụng để đăng nhập với phương thức khác";
 //notification
 const emailVerificationSent = "Email xác thực đã được gửi";
 

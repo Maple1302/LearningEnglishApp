@@ -43,21 +43,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       'sampleText': "Hello, What's your name?",
       'mean': 'Xin chào, Bạn tên gì?',
     },
-    {
-      'type': completeConversationQuestion,
-      'question': {
-        'text': 'Is that boy your brother, Lisa?',
-        'mean': 'Đây là bạn trai của con có phải không Lisa?'
-      },
-      'correctAnswer': {
-        'text': 'Yes, He is Tommy',
-        'mean': 'Vâng, Anh ấy là Tommy'
-      },
-      'items': [
-        'Yes, He is Tommy',
-        'Yes, that\'s my younger brother.',
-      ],
-    },
+    
 
     {
       'type': completeConversationQuestion,
@@ -87,33 +73,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
       'question': "Hello, What's your name?",
       'mean': "Xin chào, tên bạn là gì?",
     },
-    {
-      'type': transerlationListenQueston,
-      'answers': [
-        "What's",
-        'your',
-        'have',
-        'am',
-        'name?',
-      ],
-      'question': "What's your name?",
-      'mean': "Xin chào, tên bạn là gì?",
-    },
-    {
-      'type': completeConversationQuestion,
-      'question': {
-        'text': 'Is Lisa?',
-        'mean': 'Đây là bạn trai của con có phải không Lisa?'
-      },
-      'correctAnswer': {
-        'text': 'Yes, He is Tommy',
-        'mean': 'Vâng, Anh ấy là Tommy'
-      },
-      'items': [
-        'Yes, He is Tommy',
-        'Yes, that\'s my younger brother.',
-      ],
-    },
+    
+   
     {
       'type': transerlationReadQueston,
       'answers': [
@@ -127,21 +88,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       'question': "Hello, What's your name?",
       'mean': "Xin chào, tên bạn là gì?",
     },
-    {
-      'type': completeConversationQuestion,
-      'question': {
-        'text': 'what can i do?',
-        'mean': 'Đây là bạn trai của con có phải không Lisa?'
-      },
-      'correctAnswer': {
-        'text': 'Yes, He is Tommy',
-        'mean': 'Vâng, Anh ấy là Tommy'
-      },
-      'items': [
-        'Yes, He is Tommy',
-        'Yes, that\'s my younger brother.',
-      ],
-    },
+   
 
     {
       'type': matchingPairSoundQuestion,

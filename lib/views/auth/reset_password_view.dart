@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_color/flutter_color.dart';
 
-import 'package:maple/utils/constants.dart';
+
 import 'package:maple/views/auth/login_view.dart';
 
 import 'package:provider/provider.dart';
 import 'package:maple/viewmodels/auth_viewmodel.dart';
 
+
 class ResetPasswordView extends StatelessWidget {
-   static const String routeName = "/resetpassword";
-  
+  static const String routeName = "/resetpassword";
 
   const ResetPasswordView({super.key});
 
@@ -20,20 +20,19 @@ class ResetPasswordView extends StatelessWidget {
     final FocusNode emailFocusNode = FocusNode();
 
     final TextEditingController emailController = TextEditingController();
-bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
     void goToLoginPage() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, '/');
       });
     }
-
-    Future<void> showMyDialog(String message) async {
-      return showDialog<void>(
+void showErrorDialog(String message) {
+      showDialog<void>(
         context: context,
-        barrierDismissible: false, // user must tap button to close the dialog
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Thông báo'),
+            title: const Text('Lỗi'),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
@@ -43,15 +42,9 @@ bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('OK'),
+                child: const Text('Đồng ý'),
                 onPressed: () {
-                  if(message != emailNotFound){
-                      goToLoginPage();
-                  }
-                  else{
-                     Navigator.of(context).pop();
-                  }
-              
+                  Navigator.of(context).pop();
                 },
               ),
             ],
@@ -59,6 +52,8 @@ bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
         },
       );
     }
+
+    
 
     return Scaffold(
       body: Stack(
@@ -151,11 +146,11 @@ bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
                                             .resetPassword(email);
                                         if (authViewModel.errorMessage !=
                                             null) {
-                                          showMyDialog(
+                                          showErrorDialog(
                                               authViewModel.errorMessage!);
                                         }
                                       } catch (e) {
-                                        showMyDialog(e.toString());
+                                        showErrorDialog(e.toString());
                                       }
                                     }
                                   : null,
@@ -187,16 +182,18 @@ bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
                           child: Text.rich(
                             TextSpan(
                               text: "Bạn đã có tài khoản? ",
-                              style: const TextStyle(color: Colors.black,fontSize: 16),
+                              style: const TextStyle(
+                                  color: Colors.black, fontSize: 16),
                               children: [
                                 TextSpan(
                                   text: 'Đăng nhập',
-                                  style: const TextStyle(color: Colors.white,fontSize: 16),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 16),
                                   onEnter: (event) {
                                     WidgetsBinding.instance
                                         .addPostFrameCallback((_) {
                                       Navigator.pushReplacementNamed(
-                                          context, '/');
+                                          context, '/loginview');
                                     });
                                   },
                                 ),

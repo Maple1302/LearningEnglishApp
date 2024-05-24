@@ -1,14 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:maple/helper/vaildation.dart';
-import 'package:maple/responsitories/auth_responsitory.dart';
 import 'package:maple/models/user_model.dart';
+import 'package:maple/responsitories/auth_responsitory.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AuthViewModel with ChangeNotifier {
   final AuthRepository _authRepository = AuthRepository();
-  Stream<UserModel>? get authStateChangesWithModel =>
-      _authRepository.authStateChangesWithModel;
+  Stream<User?> get authStateChanges => _authRepository.authStateChanges;
   UserModel? _user;
   String? errorMessage;
   bool _isLoggedIn = false;
@@ -81,30 +80,64 @@ class AuthViewModel with ChangeNotifier {
   }
 
   AuthViewModel() {
-     _isLoading = true;
+    _isLoading = true;
+     errorMessage = null;
     notifyListeners();
-    authStateChangesWithModel?.listen((event) {
-       
-      _user = event;
-      _isLoggedIn = _user != null;
+    authStateChanges.listen((user) async {
+      if (user != null) {
+        _user = await _authRepository.getUserFromFirestore(user.uid);
+        if (_user == null) {
+          // Handle case where user data is not found in Firestore
+          _isLoggedIn = false;
+        } else {
+          _isLoggedIn = true;
+        }
+      } else {
+        _isLoggedIn = false;
+      }
       _isLoading = false;
-       errorMessage = null;
-       notifyListeners();
+      notifyListeners();
     });
     _isLoading = false;
-      notifyListeners();
+    notifyListeners();
   }
 
   Future<void> signInWithGoogle() async {
     try {
       _isLoading = true;
+       errorMessage = null;
       notifyListeners();
-      _user = await _authRepository.signInWithGoogle();
+      User? user = await _authRepository.signInWithGoogle();
+      if (user != null) {
+        await _authRepository.saveUserToFirestore(
+            user, user.displayName ?? 'user');
+        _user = await _authRepository.getUserFromFirestore(user.uid);
+        _isLoggedIn = true;
+      }
       _isLoading = false;
-      errorMessage = null;
-      // On success:
-      _isLoggedIn = true;
+    } on FirebaseAuthException catch (e) {
+      // Handle Firebase-specific errors
+      switch (e.code) {
+        case 'account-exists-with-different-credential':
+          errorMessage =
+              "Tài khoản đã được sử dụng với phương thức đăng nhập khác";
+          _isLoading = false;
+          break;
+        case 'invalid-credential':
+          errorMessage = "Chứng chỉ không hợp lệ";
+          _isLoading = false;
+          break;
+        case 'email-not-verified':
+          errorMessage = "email chưa được xác thực";
+          _isLoading = false;
+          break;
+        default:
+          // Handle other Firebase errors
+          break;
+      }
     } catch (e) {
+      // Handle other errors such as network issues
+      errorMessage = 'Error signing in with Google: $e';
       _isLoading = false;
     }
     notifyListeners();
@@ -113,43 +146,45 @@ class AuthViewModel with ChangeNotifier {
   Future<void> signInWithEmail(String email, String password) async {
     try {
       _isLoading = true;
-
-      _user = await _authRepository.signInWithEmail(email, password);
-
-      if (_user != null) {
-        errorMessage = null;
-        // On success:
-        _isLoggedIn = true;
-        notifyListeners();
-      }
-
+      errorMessage = null;
       notifyListeners();
+      User? user = await _authRepository.signInWithEmail(email, password);
+      if (user != null) {
+        _user = await _authRepository.getUserFromFirestore(user.uid);
+        _isLoggedIn = true;
+      }
+      _isLoading = false;
     } on FirebaseAuthException catch (e) {
+      // Handle Firebase-specific errors
       switch (e.code) {
+        case 'invalid-email':
+          errorMessage = " Email không tồn tại";
+          _isLoading = false;
+          break;
+        case 'email-not-verified':
+          errorMessage = " Email chưa được xác thực";
+          _isLoading = false;
+          break;
+        case 'user-disabled':
+          errorMessage = " Email đang bị vô hiệu hóa";
+          _isLoading = false;
+          break;
         case 'user-not-found':
-          errorMessage = "Người dùng không tồn tại!\nHoặc email này phải đăng nhập với phương thức khác";
-
+          errorMessage = " Tài khoản không tồn tại";
+          _isLoading = false;
           break;
         case 'wrong-password':
-          errorMessage = "Mật khẩu sai!";
+          errorMessage = " Mật khẩu sai vui lòng kiểm tra lại";
+          _isLoading = false;
           break;
         default:
-          errorMessage = "Lỗi không xác định. Vui lòng thử lại sau!";
+          errorMessage = " Lỗi không xác định";
+          _isLoading = false;
           break;
       }
     } catch (e) {
-      switch (e) {
-        case 'email-not-verified':
-          errorMessage =
-              "Email chưa được xác thực.\nVui lòng xác thực email trước khi đăng nhập!";
-          _isLoggedIn = false;
-          _user = null;
-          await _authRepository.signOut();
-          break;
-        case 'user-not-found':
-          _isLoggedIn = false;
-          _user = null;
-      }
+      errorMessage = "Lỗi:${e.toString()}";
+      _isLoading = false;
     }
     _isLoading = false;
     notifyListeners();
@@ -159,32 +194,39 @@ class AuthViewModel with ChangeNotifier {
       String email, String password, String userName) async {
     try {
       _isLoading = true;
-      _user =
-          await _authRepository.registerWithEmail(email, password, userName);
-      if (_authRepository.notification != '') {
-        errorMessage = _authRepository.notification;
+       errorMessage = null;
+      notifyListeners();
+      User? user = await _authRepository.registerWithEmail(email, password);
+      if (user != null) {
+        await _authRepository.saveUserToFirestore(user, userName);
+        _user = await _authRepository.getUserFromFirestore(user.uid);
+        _isLoggedIn = true;
       }
-      errorMessage = null;
       _isLoading = false;
     } on FirebaseAuthException catch (e) {
+      // Handle Firebase-specific errors
       switch (e.code) {
         case 'email-already-in-use':
-          errorMessage = "Email này đã được sử dụng bởi tài khoản khác!";
+          errorMessage = " Email đã được sử dụng";
+          _isLoading = false;
+          break;
+        case 'invalid-email':
+          errorMessage = " Email không tồn tại";
+          _isLoading = false;
           break;
         case 'weak-password':
-          errorMessage = "Mật khẩu quá ngắn!";
+          errorMessage = " Mật khẩu quá ngắn";
+          _isLoading = false;
           break;
         default:
-          errorMessage = "Lỗi không xác định!";
+          errorMessage = " Lỗi không xác định";
+          _isLoading = false;
           break;
       }
-      _isLoading = false;
     } catch (e) {
-      switch (e) {
-        case 'user-not-found':
-          _isLoggedIn = false;
-          _user = null;
-      }
+      // Handle other errors such as network issues
+      errorMessage = " Lỗi kết nối, vui lòng thử lại sau";
+      _isLoading = false;
     }
     notifyListeners();
   }
@@ -192,16 +234,30 @@ class AuthViewModel with ChangeNotifier {
   Future<void> resetPassword(String email) async {
     try {
       _isLoading = true;
+       errorMessage = null;
       await _authRepository.resetPassword(email);
       _isLoading = false;
-      if (_authRepository.notification != '') {
-        errorMessage = _authRepository.notification;
-      } else {
-        errorMessage =
-            "Email reset mật khẩu đã được gửi!\nVui lòng kiểm tra email để đặt lại mật khẩu!";
-      }
     } on FirebaseAuthException catch (e) {
-      errorMessage = e.toString();
+      // Handle Firebase-specific errors
+
+      switch (e.code) {
+        case 'invalid-email':
+          errorMessage = " Email đã không tồn tại";
+          _isLoading = false;
+          break;
+        case 'user-not-found':
+          errorMessage = " Tài khoản không tồn tại";
+          _isLoading = false;
+          break;
+        default:
+          errorMessage = " Lỗi kết nối.\nVui lòng thử lại sau";
+          _isLoading = false;
+          break;
+      }
+    } catch (e) {
+      // Handle other errors
+      errorMessage = " Lỗi kết nối.\nVui lòng thử lại sau";
+      _isLoading = false;
     }
     notifyListeners();
   }
@@ -209,19 +265,16 @@ class AuthViewModel with ChangeNotifier {
   Future<void> signOut() async {
     try {
       _isLoading = true;
+       errorMessage = null;
       await _authRepository.signOut();
-      _isLoading = false;
       _user = null;
-      errorMessage = null;
       _isLoggedIn = false;
+      _isLoading = false;
       notifyListeners();
     } catch (e) {
-      switch (e) {
-        case 'user-not-found':
-          _isLoggedIn = false;
-          _user = null;
-      }
+      errorMessage = e.toString();
       _isLoading = false;
+      notifyListeners();
     }
   }
 }

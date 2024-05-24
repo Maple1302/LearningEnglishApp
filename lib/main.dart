@@ -1,20 +1,21 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:maple/firebase_options.dart';
 
-import 'package:maple/screen/myapp.dart';
+
 import 'package:maple/views/auth/reset_password_view.dart';
 import 'package:maple/views/home/home.dart';
 import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:maple/views/auth/login_view.dart';
 import 'package:maple/views/auth/register_view.dart';
 import 'package:maple/views/lessons/hearingcheck.dart';
-import 'package:maple/views/questions/pronunciation_screen.dart';
+
 import 'package:maple/views/questions/questions_screen.dart';
 import 'package:maple/views/questions/result_screen.dart';
 import 'package:provider/provider.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -33,28 +34,16 @@ class MyHome extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => AuthViewModel(),
-          child: Consumer<AuthViewModel>(
-            builder: (context, authViewModel, child) {
-              if (authViewModel.isLoading) {
-                return const Center(
-                  child:
-                      CircularProgressIndicator(), // Hiển thị vòng xoay tải khi đang tải
-                );
-              } else if (authViewModel.isLoggedIn) {
-                return const Home();
-              } else {
-                return const LoginView();
-              }
-            },
-          ),
+          
         ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         initialRoute: '/',
         routes: {
           '/': (context) =>
-              const LoginView(), // Màn hình đăng nhập là màn hình mặc định
-          '/home': (context) => const Home(),
+              const Home(), // Màn hình đăng nhập là màn hình mặc định
+          '/loginview': (context) => const LoginView(),
           '/signup': (context) => const RegisterView(),
           //'/speechcheck':(context) => const PronunciationCheckView(sampleText: '',mean: '',),
           '/hearingcheck': (context) => const HearingCheckView(),
@@ -66,4 +55,5 @@ class MyHome extends StatelessWidget {
       ),
     );
   }
+  
 }

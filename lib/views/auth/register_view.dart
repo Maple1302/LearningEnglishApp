@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_color/flutter_color.dart';
 import 'package:maple/utils/constants.dart';
+import 'package:maple/views/auth/login_view.dart';
 import 'package:provider/provider.dart';
 
 import 'package:maple/viewmodels/auth_viewmodel.dart';
-
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -72,6 +72,32 @@ class _RegisterViewState extends State<RegisterView> {
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
     bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    void showErrorDialog(String message) {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Lỗi'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text(message),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Đồng ý'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
 
     return Scaffold(
       body: Stack(
@@ -103,7 +129,7 @@ class _RegisterViewState extends State<RegisterView> {
                   children: [
                     const Spacer(),
                     const Text(
-                      'Welcome!\nCreate an Account',
+                      'Welcome! Create an Account',
                       style: TextStyle(
                         fontSize: 24,
                         color: Colors.white,
@@ -184,77 +210,20 @@ class _RegisterViewState extends State<RegisterView> {
                       },
                     ),
                     const SizedBox(height: 5),
-                    StreamBuilder<String?>(
-                      stream: authViewModel.isPasswordValid,
-                      builder: (context, snapshot) {
-                        return TextField(
-                          controller: _passwordController,
-                          focusNode: _passwordFocusNode,
-                          obscureText: true,
-                          onChanged: authViewModel.changePassword,
-                          style: TextStyle(
-                            color: _passwordFocusNode.hasFocus
-                                ? Colors.white
-                                : Colors.black,
-                          ),
-                          decoration: InputDecoration(
-                            icon: const Icon(Icons.password),
-                            iconColor: HexColor("#b7d7d3"),
-                            labelText: 'Mật khẩu',
-                            labelStyle: TextStyle(
-                              color: _passwordFocusNode.hasFocus
-                                  ? Colors.white
-                                  : Colors.black,
-                            ),
-                            errorText: snapshot.data,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: Colors.white,
-                                width: 2.0,
-                              ),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                          ),
-                        );
-                      },
+                    PasswordField(
+                      controller: _passwordController,
+                      focusNode: _passwordFocusNode,
+                      validationStream: authViewModel.isPasswordValid,
+                      onChanged: authViewModel.changePassword,
                     ),
-                    const SizedBox(height: 5),
-                    TextField(
+                    PasswordField(
                       controller: _passwordConfirmController,
                       focusNode: _passwordConfirmFocusNode,
-                      obscureText: true,
-                     
-                      style: TextStyle(
-                        color: _passwordConfirmFocusNode.hasFocus
-                            ? Colors.white
-                            : Colors.black,
-                      ),
-                      decoration: InputDecoration(
-                        icon: const Icon(Icons.password),
-                        iconColor: _passwordConfirmFocusNode.hasFocus
-                            ? HexColor("#b7d7d3")
-                            : Colors.black,
-                        labelText: 'Nhập lại mật khẩu',
-                        labelStyle: TextStyle(
-                          color: _passwordConfirmFocusNode.hasFocus
-                              ? Colors.white
-                              : Colors.black,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Colors.white,
-                            width: 2.0,
-                          ),
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                      ),
+                      validationStream: authViewModel.isPasswordMatched,
+                      onChanged: authViewModel.changePasswordConfirm,
+                      labelText: "Nhập lại mật khẩu",
                     ),
+                    const SizedBox(height: 5),
                     const Spacer(),
                     const SizedBox(height: 24),
                     StreamBuilder<bool>(
@@ -277,29 +246,36 @@ class _RegisterViewState extends State<RegisterView> {
                                   ? () async {
                                       final email = _emailController.text;
                                       final password = _passwordController.text;
+                                      final passwordCo =
+                                          _passwordConfirmController.text;
                                       final username = _usernameController.text;
                                       try {
-                                        await authViewModel.registerWithEmail(
-                                            email, password, username);
-                                        if (authViewModel.errorMessage !=
-                                            null) {
-                                          showMyDialog(
-                                              authViewModel.errorMessage!);
-                                          if (authViewModel.errorMessage ==
-                                              emailVerificationSent) {
+                                        if (password == passwordCo) {
+                                          await authViewModel.registerWithEmail(
+                                              email, password, username);
+                                          if (authViewModel.errorMessage !=
+                                              null) {
+                                            showErrorDialog(
+                                                authViewModel.errorMessage!);
+                                            if (authViewModel.errorMessage ==
+                                                emailVerificationSent) {
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                Navigator.pushReplacementNamed(
+                                                    context, '/loginview');
+                                              });
+                                            }
+                                          }
+                                          if (authViewModel.user != null) {
                                             WidgetsBinding.instance
                                                 .addPostFrameCallback((_) {
                                               Navigator.pushReplacementNamed(
-                                                  context, '/');
+                                                  context, '/loginview');
                                             });
                                           }
                                         }
-                                        if (authViewModel.user != null) {
-                                          WidgetsBinding.instance
-                                              .addPostFrameCallback((_) {
-                                            Navigator.pushReplacementNamed(
-                                                context, '/');
-                                          });
+                                        else{
+                                          showErrorDialog("Mật khẩu không khớp vui lòng kiểm tra lại");
                                         }
                                       } catch (e) {
                                         showMyDialog(e.toString());
@@ -325,22 +301,24 @@ class _RegisterViewState extends State<RegisterView> {
                       },
                     ),
                     const SizedBox(height: 10),
-                    
                     Visibility(
                       visible: !isKeyboardOpen,
                       child: Center(
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/');
+                            Navigator.pushReplacementNamed(
+                                context, '/loginview');
                           },
                           child: Text.rich(
                             TextSpan(
                               text: "Bạn đã có tài khoản? ",
-                              style: const TextStyle(color: Colors.black,fontSize: 16),
+                              style: const TextStyle(
+                                  color: Colors.black, fontSize: 16),
                               children: [
                                 TextSpan(
                                   text: 'Đăng nhập',
-                                  style: const TextStyle(color: Colors.white,fontSize: 16),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 16),
                                   onEnter: (event) {
                                     WidgetsBinding.instance
                                         .addPostFrameCallback((_) {
