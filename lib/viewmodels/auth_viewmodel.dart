@@ -81,31 +81,38 @@ class AuthViewModel with ChangeNotifier {
 
   AuthViewModel() {
     _isLoading = true;
-     errorMessage = null;
+    errorMessage = null;
     notifyListeners();
     authStateChanges.listen((user) async {
+      _isLoading = true;
       if (user != null) {
         _user = await _authRepository.getUserFromFirestore(user.uid);
         if (_user == null) {
           // Handle case where user data is not found in Firestore
           _isLoggedIn = false;
+          _isLoading = false;
+          notifyListeners();
         } else {
           _isLoggedIn = true;
+          _isLoading = false;
+          notifyListeners();
         }
       } else {
         _isLoggedIn = false;
+        _isLoading = false;
+        notifyListeners();
       }
       _isLoading = false;
       notifyListeners();
     });
-    _isLoading = false;
-    notifyListeners();
+    // _isLoading = false;
+    //notifyListeners();
   }
 
   Future<void> signInWithGoogle() async {
     try {
       _isLoading = true;
-       errorMessage = null;
+      errorMessage = null;
       notifyListeners();
       User? user = await _authRepository.signInWithGoogle();
       if (user != null) {
@@ -194,7 +201,7 @@ class AuthViewModel with ChangeNotifier {
       String email, String password, String userName) async {
     try {
       _isLoading = true;
-       errorMessage = null;
+      errorMessage = null;
       notifyListeners();
       User? user = await _authRepository.registerWithEmail(email, password);
       if (user != null) {
@@ -234,7 +241,7 @@ class AuthViewModel with ChangeNotifier {
   Future<void> resetPassword(String email) async {
     try {
       _isLoading = true;
-       errorMessage = null;
+      errorMessage = null;
       await _authRepository.resetPassword(email);
       _isLoading = false;
     } on FirebaseAuthException catch (e) {
@@ -265,7 +272,7 @@ class AuthViewModel with ChangeNotifier {
   Future<void> signOut() async {
     try {
       _isLoading = true;
-       errorMessage = null;
+      errorMessage = null;
       await _authRepository.signOut();
       _user = null;
       _isLoggedIn = false;

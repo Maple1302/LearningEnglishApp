@@ -335,8 +335,11 @@ class _LoginViewState extends State<LoginView> {
               Positioned.fill(
                 child: Visibility(
                   visible: authViewModel.isLoading,
-                  child: const Center(
+                  child: Container(
+                    color:Colors.black54,
+                    child: const Center(
                     child: CircularProgressIndicator(),
+                  ) 
                   ),
                 ),
               ),
