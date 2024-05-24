@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_color/flutter_color.dart';
 
-import 'package:maple/screen/login_page.dart';
 import 'package:maple/utils/constants.dart';
+import 'package:maple/views/auth/login_view.dart';
 
 import 'package:provider/provider.dart';
 import 'package:maple/viewmodels/auth_viewmodel.dart';
