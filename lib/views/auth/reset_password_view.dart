@@ -20,7 +20,7 @@ class ResetPasswordView extends StatelessWidget {
     final FocusNode emailFocusNode = FocusNode();
 
     final TextEditingController emailController = TextEditingController();
-
+bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
     void goToLoginPage() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, '/');
@@ -176,6 +176,35 @@ class ResetPasswordView extends StatelessWidget {
                           ),
                         );
                       },
+                    ),
+                    Visibility(
+                      visible: !isKeyboardOpen,
+                      child: Center(
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(context, '/');
+                          },
+                          child: Text.rich(
+                            TextSpan(
+                              text: "Bạn đã có tài khoản? ",
+                              style: const TextStyle(color: Colors.black,fontSize: 16),
+                              children: [
+                                TextSpan(
+                                  text: 'Đăng nhập',
+                                  style: const TextStyle(color: Colors.white,fontSize: 16),
+                                  onEnter: (event) {
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                      Navigator.pushReplacementNamed(
+                                          context, '/');
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),

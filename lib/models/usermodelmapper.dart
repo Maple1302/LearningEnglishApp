@@ -10,15 +10,16 @@ class UserModelMapper {
       StreamTransformer<User?, UserModel>.fromHandlers(
         handleData: (User? user, EventSink<UserModel> sink) async {
           if (user != null) {
-            if (user.emailVerified) {
-              DocumentSnapshot documentSnapshot =
-                  await _firestore.collection('Users').doc(user.uid).get();
+            DocumentSnapshot documentSnapshot =
+                await _firestore.collection('Users').doc(user.uid).get();
+            var userData = documentSnapshot.data() as Map<String, dynamic>;
+            if (user.emailVerified || userData['signInMethod'] == "google") {
               if (documentSnapshot.exists) {
                 // Lấy dữ liệu từ document
-                var userData = documentSnapshot.data() as Map<String, dynamic>;
                 UserModel userModel = UserModel(
                     uid: user.uid,
-                    email: user.email,
+                    email: user.emailVerified ? user.email : userData['email'],
+                    signInMethod: userData['signInMethod'],
                     completedLessons: userData[
                         completedLessons], // Ví dụ: Số bài học đã hoàn thành
                     progress: userData['progress'], // Ví dụ: Tiến độ hoàn thành
@@ -34,10 +35,8 @@ class UserModelMapper {
             }
             // Tạo UserModel từ User của Firebase
           } else {
-           return; //throw 'user-not-found';
-            
+            return; //throw 'user-not-found';
           }
-         
         },
       );
 }

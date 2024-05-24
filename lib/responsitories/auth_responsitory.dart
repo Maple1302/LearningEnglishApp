@@ -16,40 +16,36 @@ class AuthRepository {
   Stream<UserModel> get authStateChangesWithModel =>
       _firebaseAuth.authStateChanges().transform(_userModelMapper.userMapper);
 
-
-
- Future<UserModel?> signInWithGoogle() async {
-  
+  Future<UserModel?> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
     _notification = '';
-    
+
     if (googleUser == null) {
       // Người dùng đã hủy đăng nhập
       throw 'login-failed';
       //return null;
     }
 
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
 
     final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
-    UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
+    UserCredential userCredential =
+        await _firebaseAuth.signInWithCredential(credential);
     User? user = userCredential.user;
     String? userName = user?.displayName ?? 'user';
+    String email = googleUser.email;
 
     if (user != null) {
-      return _saveUserToFirestore(user, userName);
+      return _saveUserToFirestore(user, userName, email);
     }
 
     return null;
-  
-
-  
-}
-
+  }
 
   Future<UserModel?> signInWithEmail(String email, String password) async {
     UserCredential userCredential = await _firebaseAuth
@@ -67,35 +63,41 @@ class AuthRepository {
 
   Future<UserModel?> registerWithEmail(
       String email, String password, String userName) async {
-    UserCredential userCredential = await _firebaseAuth
-        .createUserWithEmailAndPassword(email: email, password: password);
+    bool isGoogleMethod = await isGoogleSignIn(email);
+    if (!isGoogleMethod) {
+      UserCredential userCredential = await _firebaseAuth
+          .createUserWithEmailAndPassword(email: email, password: password);
 
-    User? user = userCredential.user;
-    _notification = '';
-    if (user != null) {
-      await user.sendEmailVerification();
-      _notification = emailVerificationSent;
-      return _saveUserToFirestore(user, userName);
+      User? user = userCredential.user;
+      _notification = '';
+      if (user != null) {
+        await user.sendEmailVerification();
+        _notification = emailVerificationSent;
+        return _saveUserToFirestore(user, userName, '');
+      }
     }
+    else{
+      _notification = 'Email đã được sử dụng để đăng nhập bằng tài khoản google ';
+    }
+
     return null;
   }
 
   Future<bool> resetPassword(String email) async {
     _notification = '';
-      final querySnapshot = await FirebaseFirestore.instance
+    final querySnapshot = await FirebaseFirestore.instance
         .collection('Users') // Thay 'users' bằng tên collection của bạn
         .where('email', isEqualTo: email)
         .get();
+    bool isEmailMethod = await isEmailSignIn(email);
 
-    if (querySnapshot.docs.isNotEmpty) {
+    if (querySnapshot.docs.isNotEmpty && isEmailMethod) {
       await _firebaseAuth.sendPasswordResetEmail(email: email);
       return true;
-    }
-    else{
+    } else {
       _notification = emailNotFound;
-       return false;
+      return false;
     }
-   
   }
 
   Future<void> signOut() async {
@@ -110,7 +112,8 @@ class AuthRepository {
     return user?.emailVerified ?? false;
   }
 
-  Future<UserModel?> _saveUserToFirestore(User user, String userName) async {
+  Future<UserModel?> _saveUserToFirestore(
+      User user, String userName, String email) async {
     DocumentSnapshot documentSnapshot =
         await _firestore.collection('Users').doc(user.uid).get();
     UserModel userModel;
@@ -121,7 +124,8 @@ class AuthRepository {
     } else {
       userModel = UserModel(
         uid: user.uid,
-        email: user.email,
+        email: user.email ?? email,
+        signInMethod: user.email == null ? "google" : "email",
         completedLessons: '0',
         progress: '0%',
         username: userName,
@@ -146,5 +150,34 @@ class AuthRepository {
       return UserModel.fromMap(doc.data() as Map<String, dynamic>);
     }
     return null;
+  } // Hàm này kiểm tra xem một email đã được đăng nhập bằng Google hay không
+
+  Future<bool> isGoogleSignIn(String email) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('email', isEqualTo: email)
+          .where('signInMethod', isEqualTo: 'google')
+          .get();
+
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+// Hàm này kiểm tra xem một email đã được đăng nhập bằng email/mật khẩu hay không
+  Future<bool> isEmailSignIn(String email) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('email', isEqualTo: email)
+          .where('signInMethod', isEqualTo: 'email')
+          .get();
+
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
   }
 }

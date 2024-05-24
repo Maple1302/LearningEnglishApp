@@ -80,36 +80,34 @@ class AuthViewModel with ChangeNotifier {
     _usernameSubject.close();
   }
 
-   AuthViewModel() {
-    _isLoading = true;
+  AuthViewModel() {
+     _isLoading = true;
     notifyListeners();
     authStateChangesWithModel?.listen((event) {
+       
       _user = event;
       _isLoggedIn = _user != null;
       _isLoading = false;
-      notifyListeners();
+       errorMessage = null;
+       notifyListeners();
     });
-   _isLoading = false;
-   //notifyListeners();
+    _isLoading = false;
+      notifyListeners();
   }
 
   Future<void> signInWithGoogle() async {
     try {
       _isLoading = true;
-     
+      notifyListeners();
       _user = await _authRepository.signInWithGoogle();
-     
+      _isLoading = false;
       errorMessage = null;
       // On success:
       _isLoggedIn = true;
     } catch (e) {
-       notifyListeners();
       _isLoading = false;
-     
     }
-     _isLoading = false;
     notifyListeners();
-    
   }
 
   Future<void> signInWithEmail(String email, String password) async {
@@ -129,7 +127,7 @@ class AuthViewModel with ChangeNotifier {
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'user-not-found':
-          errorMessage = "Người dùng không tồn tại!";
+          errorMessage = "Người dùng không tồn tại!\nHoặc email này phải đăng nhập với phương thức khác";
 
           break;
         case 'wrong-password':
@@ -222,10 +220,8 @@ class AuthViewModel with ChangeNotifier {
         case 'user-not-found':
           _isLoggedIn = false;
           _user = null;
-          notifyListeners();
       }
       _isLoading = false;
-      notifyListeners();
     }
   }
 }

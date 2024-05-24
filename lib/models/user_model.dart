@@ -1,6 +1,7 @@
 class UserModel {
   final String uid;
   final String? email;
+  final String signInMethod;
   final String completedLessons;
   final String progress; 
   final String? username;
@@ -12,6 +13,7 @@ class UserModel {
   UserModel({
     required this.uid,
     this.email,
+    required this.signInMethod, 
     required this.completedLessons,
     required this.progress,
     required this.username,
@@ -26,6 +28,7 @@ class UserModel {
     return {
       'uid': uid,
       'email': email,
+      'signInMethod':signInMethod,
       'completedLessons': completedLessons,
       'progress': progress,
       'username': username,
@@ -41,6 +44,7 @@ class UserModel {
     return UserModel(
       uid: map['uid'],
       email: map['email'],
+      signInMethod:map['signInMethod'],
       completedLessons: map['completedLessons'],
       progress: map['progress'],
       username: map['username'],

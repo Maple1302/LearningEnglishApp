@@ -298,7 +298,7 @@ class _RegisterViewState extends State<RegisterView> {
                                           WidgetsBinding.instance
                                               .addPostFrameCallback((_) {
                                             Navigator.pushReplacementNamed(
-                                                context, '/home');
+                                                context, '/');
                                           });
                                         }
                                       } catch (e) {
@@ -318,7 +318,7 @@ class _RegisterViewState extends State<RegisterView> {
                                   ),
                                 ),
                               ),
-                              child: const Text("Sign Up"),
+                              child: const Text("Đăng ký"),
                             ),
                           ),
                         );

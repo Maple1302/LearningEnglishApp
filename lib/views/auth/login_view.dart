@@ -131,7 +131,7 @@ class _LoginViewState extends State<LoginView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(
-                      height: 10,
+                      height: 9,
                     ),
                     const Text(
                       'AYA-KO',

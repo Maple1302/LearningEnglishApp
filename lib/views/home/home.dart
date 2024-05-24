@@ -139,6 +139,7 @@ class ProfilePage extends StatelessWidget {
             Text('Language: ${user.language}'),
             Text('Heart: ${user.heart}'),
             Text('Gem: ${user.gem}'),
+             Text('SignInMethod: ${user.signInMethod}'),
           ],
         ],
       ),
