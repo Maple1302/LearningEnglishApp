@@ -11,7 +11,7 @@ import 'package:maple/models/pronunciation_question.dart';
 part 'questionmodel.g.dart';
 
 @JsonSerializable()
-class TranslationScreen {
+class QuestionModel {
   final List<CompleteConversationQuestion> completeConversationQuestions;
   final List<CompleteMissingSentenceQuestion> completeMissingSentenceQuestions;
   final List<ImageSelectionQuestion> imageSelectionQuestions;
