@@ -7,6 +7,7 @@ import 'package:maple/models/image_selection_question.dart';
 import 'package:maple/models/listening_question.dart';
 import 'package:maple/models/matching_pair_question.dart';
 import 'package:maple/models/pronunciation_question.dart';
+import 'package:maple/models/translation_question.dart';
 
 part 'questionmodel.g.dart';
 
@@ -20,7 +21,7 @@ class QuestionModel {
   final List<PronunciationQuestion> pronunciationQuestions;
   final List<TranslationScreen> translationScreens;
 
-  TranslationScreen(
+  QuestionModel(
       {required this.completeConversationQuestions,
       required this.completeMissingSentenceQuestions,
       required this.imageSelectionQuestions,

@@ -216,10 +216,10 @@ class _ButtomItemReplaceState extends State<ButtomItemReplace> {
 
 
 class AudioButton extends StatefulWidget {
-  const AudioButton({Key? key}) : super(key: key);
+  const AudioButton({super.key});
 
   @override
-  _AudioButtonState createState() => _AudioButtonState();
+  State<AudioButton> createState() => _AudioButtonState();
 }
 
 class _AudioButtonState extends State<AudioButton> {

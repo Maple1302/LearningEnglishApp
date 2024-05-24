@@ -21,11 +21,6 @@ class ResetPasswordView extends StatelessWidget {
 
     final TextEditingController emailController = TextEditingController();
     bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
-    void goToLoginPage() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, '/');
-      });
-    }
 void showErrorDialog(String message) {
       showDialog<void>(
         context: context,

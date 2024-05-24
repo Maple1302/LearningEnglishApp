@@ -218,7 +218,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   Navigator.of(context)
                       .pop(true); // Đóng hộp thoại sau 0.5 giây
                 });
-                AudioHelper.playSound('bonus'); // Phát âm thanh 'bonus'
+                AudioHelper.playSound('bounus'); // Phát âm thanh 'bonus'
                 return AlertDialog(
                   backgroundColor: color,
                   title: Row(
@@ -399,7 +399,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                             "Nếu bạn thoát sẽ mất toàn bộ điểm đã kiếm được trong bài học này");
                       } else {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          Navigator.pushReplacementNamed(context, '/home');
+                          Navigator.pushReplacementNamed(context, '/');
                         });
                       }
                     },
@@ -519,11 +519,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
             TextButton(
                 onPressed: () {
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  Future.delayed(const Duration(milliseconds: 250), () {
+                 
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.pushReplacementNamed(context, '/home');
+                      Navigator.pushReplacementNamed(context, '/');
                     });
-                  });
+                  
                 },
                 child: const Text(
                   "Thoát",

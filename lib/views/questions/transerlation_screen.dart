@@ -283,7 +283,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
   String convertListToString(List<String> text) {
     String result = '';
     for (var element in text) {
-      result += element + ' ';
+      result += '$element ';
     }
 
     if (result.isNotEmpty) {

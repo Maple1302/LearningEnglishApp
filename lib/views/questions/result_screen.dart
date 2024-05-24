@@ -65,7 +65,7 @@ class ResultScreen extends StatelessWidget {
               ButtonCheck(
                 onPressed: () {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    Navigator.pushReplacementNamed(context, '/home');
+                    Navigator.pushReplacementNamed(context, '/');
                   });
                 },
                 text: 'Tiếp tục',
