@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:maple/screen/login_page.dart';
 import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:maple/views/auth/login_view.dart';
 import 'package:maple/views/lessons/levels.dart';
@@ -59,7 +58,7 @@ class _HomeState extends State<Home> {
           });
         },
       ),
-    ):const LoginPage();
+    ):const LoginView();
   }
 
   BottomNavigationBarItem navBarItem({required String image, required String activeImage}) {

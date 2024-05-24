@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:maple/firebase_options.dart';
-import 'package:maple/screen/login_page.dart';
+
 import 'package:maple/screen/myapp.dart';
 import 'package:maple/views/auth/reset_password_view.dart';
 import 'package:maple/views/home/home.dart';

@@ -34,8 +34,8 @@ class UserModelMapper {
             }
             // Tạo UserModel từ User của Firebase
           } else {
-           // throw 'user-not-found';
-            return;
+           return; //throw 'user-not-found';
+            
           }
          
         },

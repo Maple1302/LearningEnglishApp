@@ -34,16 +34,14 @@ class _LoginViewState extends State<LoginView> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (authViewModel.isLoggedIn) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, '/home');
-      });
       }
     });
 
     void goToHomePage() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      
         Navigator.pushReplacementNamed(context, '/home');
-      });
+      
     }
 
     Future<void> showMyDialog(String message) async {
@@ -88,9 +86,9 @@ class _LoginViewState extends State<LoginView> {
               text: "Đăng nhập với Google",
               onPressed: () async {
                 await authViewModel.signInWithGoogle();
-                 if (authViewModel.user != null) {
+                if (authViewModel.user != null) {
                   goToHomePage();
-                } 
+                }
               },
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -235,11 +233,10 @@ class _LoginViewState extends State<LoginView> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
-                          WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                      Navigator.pushReplacementNamed(
-                                          context, ResetPasswordView.routeName);
-                                    });
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            Navigator.pushReplacementNamed(
+                                context, ResetPasswordView.routeName);
+                          });
                         },
                         child: const Text(
                           'Quên mật khẩu?',
@@ -357,6 +354,7 @@ class _LoginViewState extends State<LoginView> {
             ),
           ),
           Positioned.fill(
+            
             child: authViewModel.isLoading
                 ? Container(
                     color: Colors.black54,
