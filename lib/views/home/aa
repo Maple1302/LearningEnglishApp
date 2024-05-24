@@ -1,0 +1,113 @@
+import 'package:flutter/material.dart';
+import 'package:rive/rive.dart';
+import 'package:maple/views/home/home.dart';
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+
+
+class MyRiveAnimation extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: RiveAnimation.network(
+          'https://cdn.rive.app/animations/vehicles.riv',
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+}
+class LoginScreen extends StatefulWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  bool _isLoading = false;
+
+  // Hàm giả lập quá trình đăng nhập
+  Future<void> _login() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Giả lập thời gian chờ (giống như gọi API)
+    await Future.delayed(const Duration(seconds: 4));
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    // Chuyển hướng đến trang chính với hiệu ứng mờ dần
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => Home(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          var begin = 0.0;
+          var end = 2.0;
+          var curve = Curves.easeInOut;
+
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+          return FadeTransition(
+            opacity: animation.drive(tween),
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: _isLoading
+            ?  MyRiveAnimation()
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const TextField(
+                    decoration: InputDecoration(labelText: 'Username'),
+                  ),
+                  const TextField(
+                    decoration: InputDecoration(labelText: 'Password'),
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _login,
+                    child: const Text('Login'),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      body: const Center(
+        child: Text('Welcome to the Home Screen!'),
+      ),
+    );
+  }
+}
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: LoginScreen(),
+    );
+  }
+}

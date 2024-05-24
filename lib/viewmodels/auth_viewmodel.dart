@@ -88,20 +88,24 @@ class AuthViewModel with ChangeNotifier {
       if (user != null) {
         _user = await _authRepository.getUserFromFirestore(user.uid);
         if (_user == null) {
+          await Future.delayed(const Duration(seconds: 4));
           // Handle case where user data is not found in Firestore
           _isLoggedIn = false;
           _isLoading = false;
           notifyListeners();
         } else {
+           await Future.delayed(const Duration(seconds: 4));
           _isLoggedIn = true;
           _isLoading = false;
           notifyListeners();
         }
       } else {
+         await Future.delayed(const Duration(seconds: 4));
         _isLoggedIn = false;
         _isLoading = false;
         notifyListeners();
       }
+       await Future.delayed(const Duration(seconds: 4));
       _isLoading = false;
       notifyListeners();
     });

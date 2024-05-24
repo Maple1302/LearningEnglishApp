@@ -67,6 +67,7 @@ dependencies:
   firebase_analytics: ^10.10.5
   flutter_secure_storage: ^9.2.1
   json_annotation: ^4.9.0
+  rive: ^0.13.5
   
 
 dev_dependencies:

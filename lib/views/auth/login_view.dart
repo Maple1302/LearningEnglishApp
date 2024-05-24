@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_color/flutter_color.dart';
+import 'package:maple/UI/rive_animation.dart';
 import 'package:maple/main.dart';
 import 'package:maple/views/auth/register_view.dart';
 import 'package:maple/views/auth/reset_password_view.dart';
@@ -41,7 +42,6 @@ class _LoginViewState extends State<LoginView> {
               Navigator.pushReplacementNamed(context, '/home');
             }
           });
-
           void showErrorDialog(String message) {
             showDialog<void>(
               context: context,
@@ -70,6 +70,7 @@ class _LoginViewState extends State<LoginView> {
           }
 
           void goToHomePage() {
+            
             navigatorKey.currentState?.pushReplacementNamed('/');
           }
 
@@ -336,9 +337,9 @@ class _LoginViewState extends State<LoginView> {
                 child: Visibility(
                   visible: authViewModel.isLoading,
                   child: Container(
-                    color:Colors.black54,
-                    child: const Center(
-                    child: CircularProgressIndicator(),
+                   // color:Colors.black54,
+                    child:  Center(
+                    child: MyRiveAnimation(),
                   ) 
                   ),
                 ),
