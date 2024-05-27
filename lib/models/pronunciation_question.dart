@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'pronunciation_question.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class PronunciationQuestion {
    final String typeOfQuestion;
   final String sampleText;

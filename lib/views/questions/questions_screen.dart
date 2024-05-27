@@ -190,6 +190,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
           String message = '';
           String iconSource = '';
           Color color = Colors.green;
+          
           if (consecutiveCorrect == 3) {
             score += 1;
             message = "Điểm thưởng +1";
@@ -254,6 +255,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   ),
                 );
               });
+               
         }
       });
     } else {

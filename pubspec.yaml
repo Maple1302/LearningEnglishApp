@@ -68,6 +68,9 @@ dependencies:
   flutter_secure_storage: ^9.2.1
   json_annotation: ^4.9.0
   rive: ^0.13.5
+  fluid_bottom_nav_bar: ^1.4.0
+  bottom_bar_page_transition: ^2.0.0
+  card_swiper: ^3.0.1
   
 
 dev_dependencies:
@@ -90,7 +93,13 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Black.ttf
+          weight: 100 # Regular
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700 # Bold
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -106,6 +115,7 @@ flutter:
      - images/fire.png
      - images/happy-face.png
      - images/house.png
+     - images/house-active.png
      - images/mouth.png
      - images/treasure.png
      - images/heart.png
@@ -115,8 +125,6 @@ flutter:
      - images/easter-egg_noncolor.png
      - images/crown.png
      - images/restaurant.png
-     - images/NPC_Character.png
-     - images/NPC_Character1.png
      - images/turtle-icon.png
      - images/score_icon.png
      - images/clock_icon.png
@@ -126,6 +134,10 @@ flutter:
      - images/streak_5.png
      - images/streak_10.png
      - images/streak_20.png
+     - images/user-manager.png
+     - images/learning-manager.png
+     - images/cost-manager.png
+     - images/rank-icon.png
      - assets/sounds/success-effect.mp3
      - assets/sounds/correct_answer.mp3
      - assets/sounds/wrong_answer.mp3

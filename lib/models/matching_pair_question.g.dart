@@ -13,7 +13,6 @@ MatchingPairQuestion _$MatchingPairQuestionFromJson(
       items: (json['items'] as List<dynamic>)
           .map((e) => Map<String, String>.from(e as Map))
           .toList(),
-      type: json['type'] as String,
     );
 
 Map<String, dynamic> _$MatchingPairQuestionToJson(
@@ -21,5 +20,4 @@ Map<String, dynamic> _$MatchingPairQuestionToJson(
     <String, dynamic>{
       'typeOfQuestion': instance.typeOfQuestion,
       'items': instance.items,
-      'type': instance.type,
     };

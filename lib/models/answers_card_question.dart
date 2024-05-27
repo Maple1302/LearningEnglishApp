@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'answers_card_question.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class AnswersCardQuestion {
   final String typeOfQuestion;
   final String question;

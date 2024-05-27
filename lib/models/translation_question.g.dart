@@ -6,21 +6,20 @@ part of 'translation_question.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-TranslationScreen _$TranslationScreenFromJson(Map<String, dynamic> json) =>
-    TranslationScreen(
+TranslationQuestion _$TranslationQuestionFromJson(Map<String, dynamic> json) =>
+    TranslationQuestion(
       typeOfQuestion: json['typeOfQuestion'] as String,
       question: json['question'] as String,
       mean: json['mean'] as String,
       answers:
           (json['answers'] as List<dynamic>).map((e) => e as String).toList(),
-      type: json['type'] as String,
     );
 
-Map<String, dynamic> _$TranslationScreenToJson(TranslationScreen instance) =>
+Map<String, dynamic> _$TranslationQuestionToJson(
+        TranslationQuestion instance) =>
     <String, dynamic>{
       'typeOfQuestion': instance.typeOfQuestion,
       'question': instance.question,
       'mean': instance.mean,
       'answers': instance.answers,
-      'type': instance.type,
     };

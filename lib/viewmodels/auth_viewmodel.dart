@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:maple/helper/vaildation.dart';
 import 'package:maple/models/user_model.dart';
-import 'package:maple/responsitories/auth_responsitory.dart';
+import 'package:maple/repositories/auth_repository.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AuthViewModel with ChangeNotifier {
@@ -88,24 +88,24 @@ class AuthViewModel with ChangeNotifier {
       if (user != null) {
         _user = await _authRepository.getUserFromFirestore(user.uid);
         if (_user == null) {
-          await Future.delayed(const Duration(seconds: 4));
+          await Future.delayed(const Duration(seconds: 2));
           // Handle case where user data is not found in Firestore
           _isLoggedIn = false;
           _isLoading = false;
           notifyListeners();
         } else {
-           await Future.delayed(const Duration(seconds: 4));
+           await Future.delayed(const Duration(seconds: 2));
           _isLoggedIn = true;
           _isLoading = false;
           notifyListeners();
         }
       } else {
-         await Future.delayed(const Duration(seconds: 4));
+         await Future.delayed(const Duration(seconds: 2));
         _isLoggedIn = false;
         _isLoading = false;
         notifyListeners();
       }
-       await Future.delayed(const Duration(seconds: 4));
+       await Future.delayed(const Duration(seconds: 2));
       _isLoading = false;
       notifyListeners();
     });

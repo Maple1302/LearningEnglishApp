@@ -12,6 +12,9 @@ ImageSelectionQuestion _$ImageSelectionQuestionFromJson(
       typeOfQuestion: json['typeOfQuestion'] as String,
       expectedWord: json['expectedWord'] as String,
       correctAnswer: json['correctAnswer'] as String,
+      items: (json['items'] as List<dynamic>)
+          .map((e) => Map<String, String>.from(e as Map))
+          .toList(),
     );
 
 Map<String, dynamic> _$ImageSelectionQuestionToJson(
@@ -20,4 +23,5 @@ Map<String, dynamic> _$ImageSelectionQuestionToJson(
       'typeOfQuestion': instance.typeOfQuestion,
       'expectedWord': instance.expectedWord,
       'correctAnswer': instance.correctAnswer,
+      'items': instance.items,
     };

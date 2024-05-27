@@ -220,11 +220,13 @@ class _LevelsState extends State<Levels> {
           countLeft++;
           for (int i = 0; i < countLeft; i++) {
             listLeft.add(Container());
+
           }
           if (countLeft == count) {
             countLeft = 0;
             listLeft.removeAt(count);
             listLeft.removeAt(count - 1);
+            
             customList.add(columnLesson(listLeft));
             process = 1;
             continue;

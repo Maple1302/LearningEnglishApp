@@ -2,7 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:maple/firebase_options.dart';
-
+import 'package:maple/viewmodels/lesson_viewmodel.dart';
+import 'package:maple/viewmodels/map_viewmodel.dart';
+import 'package:maple/viewmodels/question_viewmodel.dart';
+import 'package:maple/viewmodels/section_viewmodel.dart';
+import 'package:maple/viewmodels/topic_viewmodel.dart';
 
 import 'package:maple/views/auth/reset_password_view.dart';
 import 'package:maple/views/home/home.dart';
@@ -34,8 +38,21 @@ class MyHome extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => AuthViewModel(),
-          
         ),
+        ChangeNotifierProvider(
+          create: (_) => QuestionViewModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => LessonViewModel(),
+        ),ChangeNotifierProvider(
+          create: (_) => TopicViewModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SectionViewModel(),
+        ),
+         ChangeNotifierProvider(
+          create: (_) => MapViewModel(),
+        )
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -55,5 +72,4 @@ class MyHome extends StatelessWidget {
       ),
     );
   }
-  
 }

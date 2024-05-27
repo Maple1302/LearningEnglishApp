@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'complete_conversation_question.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class CompleteConversationQuestion {
    final String typeOfQuestion;
   final Map<String, String> question;

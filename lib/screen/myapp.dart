@@ -1,38 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:maple/models/mapmodel.dart';
+import 'package:maple/viewmodels/map_viewmodel.dart';
+import 'package:maple/views/maps/map_list_scrren.dart';
+import 'package:maple/views/sections/section_list_screen.dart';
+import 'package:provider/provider.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  
+   
 
-  @override
+   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Firestore Example'),
-        ),
-        body: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('Questions').snapshots(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(
-                child: CircularProgressIndicator(),
+    final viewModel = Provider.of<MapViewModel>(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('maps'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('Maps').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No maps available'));
+          }
+
+          final maps = snapshot.data!.docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return MapModel.fromJson(data);
+          }).toList();
+
+          return ListView.builder(
+            itemCount: maps.length,
+            itemBuilder: (context, index) {
+              final map = maps[index];
+               return ListTile(
+                title: Text(map.description),
+                subtitle: Text('Sections: ${map.sections.length}'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SectionListScreen(map: map),
+                    ),
+                  );
+                },
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () => viewModel.deleteMap(map.id),
+                ),
               );
-            }
-            var users = snapshot.data?.docs;
-            return ListView.builder(
-              itemCount: users?.length,
-              itemBuilder: (context, index) {
-                var user = users![index];
-                return ListTile(
-                  // ignore: prefer_interpolation_to_compose_strings
-                  title: Text("${index+1}." + user['content']),
-                  subtitle: Text(user['correctAnswer']),
-                );
-              },
-            );
-          },
-        ),
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddMapScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
