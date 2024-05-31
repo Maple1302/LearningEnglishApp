@@ -7,12 +7,8 @@ class MapViewModel extends ChangeNotifier {
   List<MapModel> _maps = [];
 
   List<MapModel> get maps => _maps;
-
-
   // Lấy danh sách maps và cập nhật trạng thái
   Future<List<MapModel>> fetchMaps() async {
-    
-
     try {
       final newMaps = await _repository.fetchMaps();
       if (newMaps != _maps) {
