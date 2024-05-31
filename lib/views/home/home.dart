@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
 import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:maple/views/admin/manager_lesson_view.dart';
 import 'package:maple/views/admin/static_view.dart';
 import 'package:maple/views/auth/login_view.dart';
-import 'package:maple/views/lessons/levels.dart';
-import 'package:maple/views/maps/map_list_scrren.dart';
+import 'package:maple/views/maps/map_list_screen.dart';
 
 import 'package:provider/provider.dart';
 
 
 class Home extends StatefulWidget {
+
   const Home({super.key});
 
   @override
@@ -22,11 +20,13 @@ class _HomeState extends State<Home> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const Levels(),
+   
     const HomePage(),
     const MapListScreen(),
     const StatisticsScreen(),
     const ManagerLessonScreen(),
+    
+    
     // QuestionListScreen(lesson: LessonModel(id: '', description: 'description', question: QuestionModel(id: '', completeConversationQuestions: completeConversationQuestions, completeMissingSentenceQuestions: completeMissingSentenceQuestions, imageSelectionQuestions: imageSelectionQuestions, listeningQuestions: listeningQuestions, matchingPairQuestions: matchingPairQuestions, pronunciationQuestions: pronunciationQuestions, translationScreens: translationScreens)),),
   ];
   static BottomNavigationBarItem getBottomNavItem(String imageIcon) {
@@ -35,7 +35,7 @@ class _HomeState extends State<Home> {
         padding: const EdgeInsets.all(5),
         child: Image.asset(
           imageIcon,
-          height: 40,
+          height: 30,
         ),
       ), // Biểu tượng ngôi nhà
       label: '', // Nhãn trống
@@ -47,7 +47,7 @@ class _HomeState extends State<Home> {
             borderRadius: BorderRadius.circular(10)),
         child: Image.asset(
           imageIcon,
-          height: 40,
+          height: 30,
         ),
       ),
     );
@@ -72,7 +72,7 @@ class _HomeState extends State<Home> {
         _currentIndex = index;
       });
       pageController.animateToPage(index,
-          duration: const Duration(milliseconds: 300), curve: Curves.ease);
+          duration: const Duration(microseconds: 1), curve: Curves.ease);
     }
 
     return user != null
@@ -108,15 +108,6 @@ class _HomeState extends State<Home> {
           )
         : const LoginView();
   }
-
-  BottomNavigationBarItem navBarItem(
-      {required String image, required String activeImage}) {
-    return BottomNavigationBarItem(
-        icon: Image.asset(image, height: 30),
-        activeIcon: Image.asset(activeImage, height: 30),
-        label: '');
-  }
-
   Widget itemAppBar(String image, String value) {
     return Row(
       mainAxisSize: MainAxisSize.min,

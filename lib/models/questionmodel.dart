@@ -48,5 +48,6 @@ class QuestionModel {
       listeningQuestions.length +
       matchingPairQuestions.length +
       pronunciationQuestions.length +
-      translationQuestions.length;
+      translationQuestions.length+
+      answersCardQuestions.length;
 }

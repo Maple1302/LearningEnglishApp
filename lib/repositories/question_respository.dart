@@ -19,7 +19,7 @@ class QuestionRepository {
   // Thêm câu hỏi mới
   Future<void> addQuestion(QuestionModel question) async {
     try {
-      await _firestore.collection(_collectionPath).add(question.toJson());
+      await _firestore.collection(_collectionPath).doc(question.id).set(question.toJson());
     } catch (e) {
       throw Exception('Failed to add question: $e');
     }

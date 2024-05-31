@@ -18,6 +18,12 @@ class TopicViewModel extends ChangeNotifier {
     await fetchTopics();
   }
 
+String generateId(){
+    if(topics.isEmpty){
+      return "1";
+    }
+    return (topics.length + 1).toString();
+  }
   Future<void> updateTopic(String id, TopicModel topic) async {
     await _repository.updateTopic(id, topic);
     await fetchTopics();

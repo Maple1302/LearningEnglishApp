@@ -60,6 +60,8 @@ class StatisticsCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
+         color: Colors.white,
+         shadowColor: Colors.grey,
         child: ListTile(
           leading: CircleAvatar(
             child: Icon(icon),

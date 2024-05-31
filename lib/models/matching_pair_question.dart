@@ -10,9 +10,11 @@ class MatchingPairQuestion {
   final List<Map<String, String>> items;
 
 
+
   MatchingPairQuestion({
     required this.typeOfQuestion,
-    required this.items, });
+    required this.items,
+    });
 
   factory MatchingPairQuestion.fromJson(Map<String, dynamic> json) => _$MatchingPairQuestionFromJson(json);
 

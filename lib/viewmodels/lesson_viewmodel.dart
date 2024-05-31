@@ -27,4 +27,10 @@ class LessonViewModel extends ChangeNotifier {
     await _repository.deleteLesson(id);
     await fetchLessons();
   }
+  String generateId(){
+    if(lessons.isEmpty){
+      return "1";
+    }
+    return (lessons.length + 1).toString();
+  }
 }

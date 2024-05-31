@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:maple/firebase_options.dart';
+import 'package:maple/models/lessonmodel.dart';
 import 'package:maple/viewmodels/lesson_viewmodel.dart';
 import 'package:maple/viewmodels/map_viewmodel.dart';
 import 'package:maple/viewmodels/question_viewmodel.dart';
@@ -13,7 +14,7 @@ import 'package:maple/views/home/home.dart';
 import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:maple/views/auth/login_view.dart';
 import 'package:maple/views/auth/register_view.dart';
-import 'package:maple/views/lessons/hearingcheck.dart';
+
 
 import 'package:maple/views/questions/questions_screen.dart';
 import 'package:maple/views/questions/result_screen.dart';
@@ -62,12 +63,11 @@ class MyHome extends StatelessWidget {
               const Home(), // Màn hình đăng nhập là màn hình mặc định
           '/loginview': (context) => const LoginView(),
           '/signup': (context) => const RegisterView(),
-          //'/speechcheck':(context) => const PronunciationCheckView(sampleText: '',mean: '',),
-          '/hearingcheck': (context) => const HearingCheckView(),
+          
           ResultScreen.routeName: (context) =>
               const ResultScreen(score: 0, rateCompleted: 0, finalTime: ''),
           ResetPasswordView.routeName: (context) => const ResetPasswordView(),
-          QuestionScreen.routeName: (context) => const QuestionScreen()
+          QuestionScreen.routeName: (context) =>  QuestionScreen(lesson:LessonModel(id: '', title: '', description: '', question: [], images: '', color: ''),)
         },
       ),
     );

@@ -7,7 +7,6 @@ class StatisticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.menu),
@@ -29,17 +28,19 @@ class StatisticsScreen extends StatelessWidget {
                 title: 'User',
                 subtitle: 'Online: 15k/45k',
                 iconFath: 'images/user-manager.png',
-                progress: ProgressIndicator(progress: 0.7)),
+                progress: ProgressIndicatorCustom(progress: 70)),
             StatisticsCard(
                 title: 'Learning Progress',
                 subtitle: 'Level average : 3/5',
                 iconFath: 'images/learning-manager.png',
-                progress: ProgressIndicator(progress: 0.6)),
+                progress: ProgressIndicatorCustom(
+                  progress: 80,
+                )),
             StatisticsCard(
                 title: 'Other',
                 subtitle: 'Revenue: 15k \$',
                 iconFath: 'images/cost-manager.png',
-                progress: ProgressIndicator(progress: 0.5)),
+                progress: ProgressIndicatorCustom(progress: 30)),
             Spacer(),
           ],
         ),
@@ -48,29 +49,29 @@ class StatisticsScreen extends StatelessWidget {
   }
 }
 
-class ProgressIndicator extends StatelessWidget {
+class ProgressIndicatorCustom extends StatelessWidget {
   final double progress;
-
-  const ProgressIndicator({super.key, required this.progress});
+  final double size;
+  final String displayText;
+  const ProgressIndicatorCustom(
+      {super.key, required this.progress, this.size = 5,this.displayText = ''});
 
   @override
   Widget build(BuildContext context) {
+   
     return Container(
-    //  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
-    
       decoration: BoxDecoration(
         color: Colors.grey,
-        border: Border.all(color: Colors.white, width: 0.5), // Viền trắng
         borderRadius: BorderRadius.circular(10),
-        
       ),
       child: FAProgressBar(
-        currentValue: 70,
-        progressColor: Colors.blue,
-        size: 5,
-      //  backgroundColor: Colors.transparent, // Xóa nền của thanh tiến trình
+        currentValue: progress,
+        progressColor: Colors.green,
+        size: size,
+        displayText: displayText,
+        //  backgroundColor: Colors.transparent, // Xóa nền của thanh tiến trình
         borderRadius: BorderRadius.circular(6),
-         // Làm tròn góc của progress bar bên trong
+        // Làm tròn góc của progress bar bên trong
       ),
     );
   }
@@ -81,6 +82,7 @@ class StatisticsCard extends StatelessWidget {
   final String subtitle;
   final String iconFath;
   final Widget progress;
+  
 
   const StatisticsCard({
     super.key,
@@ -95,6 +97,7 @@ class StatisticsCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
+        color: Colors.white,
         shadowColor: Colors.grey,
         elevation: 5,
         child: Padding(
@@ -103,15 +106,16 @@ class StatisticsCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               CircleAvatar(
-               backgroundImage: AssetImage(iconFath),
-               radius: 30,
+                backgroundImage: AssetImage(iconFath),
+                radius: 30,
               ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 0.0),
                       child: Text(
                         title,
                         style: const TextStyle(
@@ -122,14 +126,16 @@ class StatisticsCard extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
-                      child: Text(subtitle, style: const TextStyle(fontSize: 16)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 0.0),
+                      child:
+                          Text(subtitle, style: const TextStyle(fontSize: 16)),
                     ),
-                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
                       child: progress,
                     ),
-                    
                   ],
                 ),
               ),

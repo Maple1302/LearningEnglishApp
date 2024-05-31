@@ -14,13 +14,12 @@ class QuestionViewModel extends ChangeNotifier {
   }
 
   Future<void> addQuestion(QuestionModel question) async {
-    
     await _repository.addQuestion(question);
     await fetchQuestions();
   }
 
-  Future<void> updateQuestion( QuestionModel question) async {
-    await _repository.updateQuestion( question);
+  Future<void> updateQuestion(QuestionModel question) async {
+    await _repository.updateQuestion(question);
     await fetchQuestions();
   }
 
@@ -29,5 +28,10 @@ class QuestionViewModel extends ChangeNotifier {
     await fetchQuestions();
   }
 
- 
+  String generateId() {
+    if (questions.isEmpty) {
+      return "1";
+    }
+    return (_questions.length + 1).toString();
+  }
 }

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
+import 'package:maple/models/lessonmodel.dart';
+import 'package:maple/models/questionmodel.dart';
 import 'package:maple/utils/constants.dart';
 import 'package:maple/views/questions/answers_card.dart';
 import 'package:maple/views/questions/background_decoration.dart';
@@ -17,13 +19,18 @@ import 'package:maple/views/questions/transerlation_screen.dart';
 
 class QuestionScreen extends StatefulWidget {
   static const String routeName = "/questionScreen";
-  const QuestionScreen({super.key});
+  final LessonModel lesson;
+  const QuestionScreen({super.key, required this.lesson});
 
   @override
   State<QuestionScreen> createState() => _QuestionScreenState();
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
+  List<QuestionModel> questions1 = [];
+
+  List<Map<String, Object>> questions11 = [];
+
   final List<Map<String, Object>> questions = [
     {
       'type': matchingPairWordQuestion,
@@ -43,7 +50,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
       'sampleText': "Hello, What's your name?",
       'mean': 'Xin chào, Bạn tên gì?',
     },
-    
 
     {
       'type': completeConversationQuestion,
@@ -73,8 +79,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       'question': "Hello, What's your name?",
       'mean': "Xin chào, tên bạn là gì?",
     },
-    
-   
+
     {
       'type': transerlationReadQueston,
       'answers': [
@@ -88,7 +93,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
       'question': "Hello, What's your name?",
       'mean': "Xin chào, tên bạn là gì?",
     },
-   
 
     {
       'type': matchingPairSoundQuestion,
@@ -147,6 +151,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
   @override
   void initState() {
     super.initState();
+    questions1 = widget.lesson.question;
+    for (int i = 0; i < questions1.length; i++) {
+      
+    }
     startTimer();
   }
 
@@ -190,17 +198,17 @@ class _QuestionScreenState extends State<QuestionScreen> {
           String message = '';
           String iconSource = '';
           Color color = Colors.green;
-          
+
           if (consecutiveCorrect == 3) {
             score += 1;
             message = "Điểm thưởng +1";
-            
+
             iconSource = "images/streak_3.png";
           } else if (consecutiveCorrect == 5) {
             score += 4;
             message = "Điểm thưởng +4";
             iconSource = "images/streak_5.png";
-             color = Colors.blue;
+            color = Colors.blue;
           } else if (consecutiveCorrect == 10) {
             score += 8;
             message = "Điểm thưởng +8";
@@ -210,7 +218,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             score += 15;
             message = "Điểm thưởng +15";
             iconSource = "images/streak_20.png";
-            color= Colors.orange;
+            color = Colors.orange;
           }
           showDialog(
               context: context,
@@ -226,18 +234,22 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Column(
-                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Image.asset(
                             iconSource,
-                            height:200,
+                            height: 200,
                             width: 200,
                           ),
-                          const SizedBox(height: 10,),
+                          const SizedBox(
+                            height: 10,
+                          ),
                           Text(
                             "Streak $consecutiveCorrect",
                             style: const TextStyle(
-                                color: Colors.white, fontSize: 20,fontWeight: FontWeight.bold),
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold),
                           ),
                         ],
                       )
@@ -248,14 +260,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     children: [
                       Text(
                         message,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 18,fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                 );
               });
-               
         }
       });
     } else {
@@ -421,7 +434,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           (currentQuestionIndex / questions.length) * 100,
                       displayText: '%',
                       size: 25,
-                  //  changeColorValue:  ((currentQuestionIndex / questions.length) * 100).ceil(),
+                      //  changeColorValue:  ((currentQuestionIndex / questions.length) * 100).ceil(),
                       backgroundColor:
                           Colors.transparent, // Xóa nền của thanh tiến trình
                       borderRadius: BorderRadius.circular(
@@ -467,7 +480,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       ),
     );
   }
-  
+
   void showAlertDialog(
     String message,
   ) {
@@ -521,11 +534,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
             TextButton(
                 onPressed: () {
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                 
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.pushReplacementNamed(context, '/');
-                    });
-                  
+
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Navigator.pushReplacementNamed(context, '/');
+                  });
                 },
                 child: const Text(
                   "Thoát",

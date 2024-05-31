@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:maple/models/mapmodel.dart';
 import 'package:maple/viewmodels/map_viewmodel.dart';
-import 'package:maple/views/maps/map_list_scrren.dart';
-import 'package:maple/views/sections/section_list_screen.dart';
+import 'package:maple/views/maps/map_list_screen.dart';
+
 import 'package:provider/provider.dart';
 
 class MyApp extends StatelessWidget {
@@ -44,15 +44,8 @@ class MyApp extends StatelessWidget {
               final map = maps[index];
                return ListTile(
                 title: Text(map.description),
-                subtitle: Text('Sections: ${map.sections.length}'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SectionListScreen(map: map),
-                    ),
-                  );
-                },
+                subtitle: const Text('Sections: '),
+                
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () => viewModel.deleteMap(map.id),
