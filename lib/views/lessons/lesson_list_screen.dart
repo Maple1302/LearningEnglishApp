@@ -30,6 +30,58 @@ class _LessonListScreenState extends State<LessonListScreen> {
     lessons = widget.topic.lessons.toList();
   }
 
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Thành công'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Đồng ý'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmationDialog(int index, LessonModel lesson) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Xác nhận xóa'),
+          content: Text('Bạn có chắc chăc muôn xóa ${lesson.description}'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  Provider.of<MapViewModel>(context, listen: false)
+                      .deleteLesson(widget.mapId, widget.topic.id, lesson.id);
+                  lessons.removeAt(index);
+                });
+                Navigator.of(context).pop(); // Close the dialog
+                _showSuccessDialog('Xóa ${lesson.description} thành công');
+              },
+              child: const Text('Xóa'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<MapViewModel>(context, listen: false);
