@@ -82,9 +82,9 @@ class _ImageSelectionScreenState extends State<ImageSelectionScreen> {
                 ),
               ),
             ),
-            const Text(
-              "ice cream",
-              style: TextStyle(fontSize: 16),
+             Text(
+              widget.expectedWord,
+              style: const TextStyle(fontSize: 16),
             )
           ],
         ),
@@ -111,7 +111,7 @@ class _ImageSelectionScreenState extends State<ImageSelectionScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(widget.items[index]['image']!,
+                    Image.network(widget.items[index]['image']!,
                         height: 80, fit: BoxFit.cover),
                     const SizedBox(height: 8),
                     Text(capitalize(widget.items[index]['text']!),

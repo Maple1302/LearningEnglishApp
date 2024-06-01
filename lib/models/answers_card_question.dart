@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:maple/utils/constants.dart';
 
 part 'answers_card_question.g.dart';
 
@@ -10,7 +11,7 @@ class AnswersCardQuestion {
   final List<String> answers;
 
   AnswersCardQuestion({
-    required this.typeOfQuestion,
+     this.typeOfQuestion = cardMutilChoiceQuestion,
     required this.question,
     required this.correctAnswer,
     required this.answers,

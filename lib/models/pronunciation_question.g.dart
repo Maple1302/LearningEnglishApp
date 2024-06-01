@@ -9,7 +9,8 @@ part of 'pronunciation_question.dart';
 PronunciationQuestion _$PronunciationQuestionFromJson(
         Map<String, dynamic> json) =>
     PronunciationQuestion(
-      typeOfQuestion: json['typeOfQuestion'] as String,
+      typeOfQuestion:
+          json['typeOfQuestion'] as String? ?? pronunciationQuestion,
       sampleText: json['sampleText'] as String,
       mean: json['mean'] as String,
     );

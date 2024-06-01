@@ -98,7 +98,7 @@ class _CompletedMissingSentenceScreenState
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Row(
+                    child: Column(
                       children: [
                         Text(widget.missingSentence,
                             style: const TextStyle(fontSize: 18)),

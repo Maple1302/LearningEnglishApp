@@ -1,6 +1,7 @@
 // complete_conversation_question.g.dart
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:maple/utils/constants.dart';
 
 part 'complete_conversation_question.g.dart';
 
@@ -12,7 +13,7 @@ class CompleteConversationQuestion {
   final List<String> items;
 
   CompleteConversationQuestion({
-    required this.typeOfQuestion,
+     this.typeOfQuestion = completeConversationQuestion,
     required this.question,
     required this.correctAnswer,
     required this.items,

@@ -1,6 +1,7 @@
 // pronunciation_question.g.dart
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:maple/utils/constants.dart';
 
 part 'pronunciation_question.g.dart';
 
@@ -10,7 +11,7 @@ class PronunciationQuestion {
   final String sampleText;
   final String mean;
 
-  PronunciationQuestion({required this.typeOfQuestion,required this.sampleText, required this.mean});
+  PronunciationQuestion({ this.typeOfQuestion = pronunciationQuestion,required this.sampleText, required this.mean});
 
   factory PronunciationQuestion.fromJson(Map<String, dynamic> json) => _$PronunciationQuestionFromJson(json);
 

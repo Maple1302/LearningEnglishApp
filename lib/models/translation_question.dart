@@ -11,7 +11,7 @@ class TranslationQuestion {
   final List<String> answers;
 
   TranslationQuestion({
-    required this.typeOfQuestion,
+    required this.typeOfQuestion ,
     required this.question,
     required this.mean,
     required this.answers,

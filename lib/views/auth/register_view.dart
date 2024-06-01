@@ -128,13 +128,14 @@ class _RegisterViewState extends State<RegisterView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Spacer(),
-                    const Text(
+                    Visibility(visible: !isKeyboardOpen,
+                    child: const Text(
                       'Welcome! Create an Account',
                       style: TextStyle(
                         fontSize: 24,
                         color: Colors.white,
                       ),
-                    ),
+                    ),) ,
                     const Spacer(),
                     StreamBuilder<String?>(
                       stream: authViewModel.isUserNameValid,
@@ -216,6 +217,7 @@ class _RegisterViewState extends State<RegisterView> {
                       validationStream: authViewModel.isPasswordValid,
                       onChanged: authViewModel.changePassword,
                     ),
+                    const SizedBox(height: 5),
                     PasswordField(
                       controller: _passwordConfirmController,
                       focusNode: _passwordConfirmFocusNode,
@@ -223,9 +225,9 @@ class _RegisterViewState extends State<RegisterView> {
                       onChanged: authViewModel.changePasswordConfirm,
                       labelText: "Nhập lại mật khẩu",
                     ),
-                    const SizedBox(height: 5),
+                  //  const SizedBox(height: 5),
                     const Spacer(),
-                    const SizedBox(height: 24),
+                     SizedBox(height: isKeyboardOpen ? 0:10),
                     StreamBuilder<bool>(
                       stream: authViewModel.isButtonSignUpEnabled,
                       builder: (context, snapshot) {

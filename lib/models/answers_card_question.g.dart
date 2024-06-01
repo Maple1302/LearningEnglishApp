@@ -8,7 +8,8 @@ part of 'answers_card_question.dart';
 
 AnswersCardQuestion _$AnswersCardQuestionFromJson(Map<String, dynamic> json) =>
     AnswersCardQuestion(
-      typeOfQuestion: json['typeOfQuestion'] as String,
+      typeOfQuestion:
+          json['typeOfQuestion'] as String? ?? cardMutilChoiceQuestion,
       question: json['question'] as String,
       correctAnswer: json['correctAnswer'] as String,
       answers:

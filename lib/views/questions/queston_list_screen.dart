@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_color/flutter_color.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maple/models/answers_card_question.dart';
 import 'package:maple/models/complete_conversation_question.dart';
@@ -16,7 +18,7 @@ import 'package:maple/viewmodels/map_viewmodel.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:provider/provider.dart';
 
-class QuestionListScreen extends StatelessWidget {
+class QuestionListScreen extends StatefulWidget {
   final String topicId;
   final String mapId;
   final LessonModel lesson;
@@ -27,54 +29,180 @@ class QuestionListScreen extends StatelessWidget {
       required this.lesson});
 
   @override
+  State<QuestionListScreen> createState() => _QuestionListScreenState();
+}
+
+class _QuestionListScreenState extends State<QuestionListScreen> {
+  @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<MapViewModel>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Questions in ${lesson.description}'),
+        centerTitle: true,
+        title: Text(widget.lesson.title),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, widget.lesson);
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          QuestionModel newListQuestion = QuestionModel(
+              id: viewModel.newIdQuestion(
+                  widget.mapId, widget.topicId, widget.lesson.id),
+              answersCardQuestions: [],
+              completeConversationQuestions: [],
+              completeMissingSentenceQuestions: [],
+              imageSelectionQuestions: [],
+              listeningQuestions: [],
+              matchingPairQuestions: [],
+              pronunciationQuestions: [],
+              translationQuestions: []);
+          _showAddConfirmationDialog(context, newListQuestion);
+        },
         child: const Icon(Icons.add),
       ),
       body: ListView.builder(
-        itemCount: lesson.question.length,
+        itemCount: widget.lesson.question.length,
         itemBuilder: (context, index) {
-          final question = lesson.question[index];
+          final question = widget.lesson.question[index];
 
-          return ListTile(
-            title: Text(" Bộ câu hỏi ${index + 1} của bài học ${lesson.title}"),
-            subtitle: Text(" Số lượng câu hỏi: ${question.length}"),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ListQuestionInLessson(
-                    question: question,
-                    mapId: mapId,
-                    topicId: topicId,
-                    lessonId: lesson.id,
+          return Card(
+            color: HexColor(widget.lesson.color),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  title: Text(
+                    " Bộ câu hỏi ${question.id} của bài học ${widget.lesson.title}",
+                    style: const TextStyle(color: Colors.white),
                   ),
+                  subtitle: Text(
+                    " Số lượng câu hỏi: ${question.length}",
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  onTap: () async {
+                    final updatedQuestion = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ListQuestionInLessson(
+                          question: question,
+                          mapId: widget.mapId,
+                          topicId: widget.topicId,
+                          lessonId: widget.lesson.id,
+                        ),
+                      ),
+                    );
+
+                    if (updatedQuestion != null) {
+                      setState(() {
+                        widget.lesson.question[index] = updatedQuestion;
+                      });
+                    }
+                  },
                 ),
-              );
-            },
-            trailing: ElevatedButton.icon(
-              onPressed: () {
-                viewModel.deleteListQuestion(
-                    mapId, topicId, lesson.id, question.id);
-              },
-              icon: const Icon(Icons.delete_forever),
-              label: const Text("Xóa"),
+                IconButton(
+                  onPressed: () {
+                    _showDeleteConfirmationDialog(context, index, question);
+                  },
+                  icon: const Icon(Icons.delete_forever),
+                ),
+              ],
             ),
           );
         },
       ),
     );
   }
+
+  Future<void> _showDeleteConfirmationDialog(
+      BuildContext context, int index, QuestionModel question) async {
+    final viewModel = Provider.of<MapViewModel>(context, listen: false);
+    return showDialog<void>(
+      context: context,
+      barrierDismissible:
+          false, // Người dùng phải nhấn vào một nút để đóng hộp thoại
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Xác nhận xóa'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Bạn có chắc chắn muốn xóa bộ câu hỏi này không?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Hủy'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Xóa'),
+              onPressed: () {
+                viewModel.deleteListQuestion(widget.mapId, widget.topicId,
+                    widget.lesson.id, question.id);
+                setState(() {
+                  widget.lesson.question.remove(question);
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showAddConfirmationDialog(
+      BuildContext context, QuestionModel newListQuestion) async {
+    final viewModel = Provider.of<MapViewModel>(context, listen: false);
+    return showDialog<void>(
+      context: context,
+      barrierDismissible:
+          false, // Người dùng phải nhấn vào một nút để đóng hộp thoại
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Xác nhận thêm'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Bạn muốn thêm bộ câu hỏi mới khônng ? '),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Hủy'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Thêm'),
+              onPressed: () {
+                viewModel.addListQuestion(widget.mapId, widget.topicId,
+                    widget.lesson.id, newListQuestion);
+                setState(() {
+                  widget.lesson.question.add(newListQuestion);
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 class ListQuestionInLessson extends StatefulWidget {
-  final QuestionModel question; //1 bộ câu hỏi
+  final QuestionModel question;
   final String mapId;
   final String topicId;
   final String lessonId;
@@ -95,99 +223,128 @@ class _ListQuestionInLesssonState extends State<ListQuestionInLessson> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          child: const Icon(Icons.add),
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text("Phân loại câu hỏi"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, widget.question);
+          },
         ),
-        body: Column(
-          children: [
-            tileByType(
-                "Answer Card Question",
-                widget.question.answersCardQuestions,
-                widget.mapId,
-                widget.topicId,
-                widget.lessonId,
-                widget.question.id),
-            tileByType(
-                "Complete Conversation Question",
-                widget.question.completeConversationQuestions,
-                widget.mapId,
-                widget.topicId,
-                widget.lessonId,
-                widget.question.id),
-            tileByType(
-                "Complete Missing Sentence Question",
-                widget.question.completeConversationQuestions,
-                widget.mapId,
-                widget.topicId,
-                widget.lessonId,
-                widget.question.id),
-            tileByType(
-                "Image Selection Question",
-                widget.question.imageSelectionQuestions,
-                widget.mapId,
-                widget.topicId,
-                widget.lessonId,
-                widget.question.id),
-            tileByType(
-                "Listening Question",
-                widget.question.listeningQuestions,
-                widget.mapId,
-                widget.topicId,
-                widget.lessonId,
-                widget.question.id),
-            tileByType(
-                "Matching Pair Question",
-                widget.question.matchingPairQuestions,
-                widget.mapId,
-                widget.topicId,
-                widget.lessonId,
-                widget.question.id),
-            tileByType(
-                "Pronunciation Question",
-                widget.question.pronunciationQuestions,
-                widget.mapId,
-                widget.topicId,
-                widget.lessonId,
-                widget.question.id),
-            tileByType(
-                "Translation Question",
-                widget.question.translationQuestions,
-                widget.mapId,
-                widget.topicId,
-                widget.lessonId,
-                widget.question.id),
-          ],
-        ));
+      ),
+      body: Column(
+        children: [
+          tileByType(
+            "Answer Card Question",
+            widget.question.answersCardQuestions,
+            widget.mapId,
+            widget.topicId,
+            widget.lessonId,
+            widget.question.id,
+            cardMutilChoiceQuestion,
+          ),
+          tileByType(
+              "Complete Conversation Question",
+              widget.question.completeConversationQuestions,
+              widget.mapId,
+              widget.topicId,
+              widget.lessonId,
+              widget.question.id,
+              completeConversationQuestion),
+          tileByType(
+              "Complete Missing Sentence Question",
+              widget.question.completeMissingSentenceQuestions,
+              widget.mapId,
+              widget.topicId,
+              widget.lessonId,
+              widget.question.id,
+              completeMissingSentenceQuestion),
+          tileByType(
+              "Image Selection Question",
+              widget.question.imageSelectionQuestions,
+              widget.mapId,
+              widget.topicId,
+              widget.lessonId,
+              widget.question.id,
+              imageSelectionQuestions),
+          tileByType(
+              "Listening Question",
+              widget.question.listeningQuestions,
+              widget.mapId,
+              widget.topicId,
+              widget.lessonId,
+              widget.question.id,
+              listenQuestion),
+          tileByType(
+              "Matching Pair Question",
+              widget.question.matchingPairQuestions,
+              widget.mapId,
+              widget.topicId,
+              widget.lessonId,
+              widget.question.id,
+              matchingPairSoundQuestion),
+          tileByType(
+              "Pronunciation Question",
+              widget.question.pronunciationQuestions,
+              widget.mapId,
+              widget.topicId,
+              widget.lessonId,
+              widget.question.id,
+              pronunciationQuestion),
+          tileByType(
+              "Translation Question",
+              widget.question.translationQuestions,
+              widget.mapId,
+              widget.topicId,
+              widget.lessonId,
+              widget.question.id,
+              transerlationReadQueston),
+        ],
+      ),
+    );
   }
 
-  Widget tileByType(String title, dynamic listQuestionByType, String mapId,
-      String topicId, String lessonId, String questionId) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Text(" Số lượng câu hỏi: ${listQuestionByType.length}"),
-      onTap: () async {
-      final updateList = await  Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ListQuestionByType(
+  Widget tileByType(
+      String title,
+      dynamic listQuestionByType,
+      String mapId,
+      String topicId,
+      String lessonId,
+      String questionId,
+      String typeOfQuestion) {
+    return Card(
+      color: Colors.blue,
+      child: ListTile(
+        title: Text(
+          title,
+          style: const TextStyle(color: Colors.white),
+        ),
+        subtitle: Text(
+          " Số lượng câu hỏi: ${listQuestionByType.length}",
+        ),
+        onTap: () async {
+          final updateList = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ListQuestionByType(
                 listQuestionByType: listQuestionByType,
                 title: title,
                 mapId: mapId,
                 topicId: topicId,
                 lessonId: lessonId,
-                questionId: questionId),
-          ),
-        );
-        if(updateList != null){
-
-        }
-      },
-      trailing: ElevatedButton.icon(
-        icon: const Icon(Icons.delete_forever),
-        label: const Text("Xóa"),
-        onPressed: () {},
+                questionId: questionId,
+                typeOfQuestion: typeOfQuestion,
+              ),
+            ),
+          );
+          if (updateList != null) {
+            setState(() {
+              // Cập nhật lại danh sách câu hỏi từ updateList
+              listQuestionByType = updateList;
+            });
+          }
+        },
       ),
     );
   }
@@ -200,6 +357,7 @@ class ListQuestionByType extends StatefulWidget {
   final String topicId;
   final String lessonId;
   final String questionId;
+  final String typeOfQuestion;
 
   const ListQuestionByType(
       {super.key,
@@ -208,7 +366,8 @@ class ListQuestionByType extends StatefulWidget {
       required this.mapId,
       required this.topicId,
       required this.lessonId,
-      required this.questionId});
+      required this.questionId,
+      required this.typeOfQuestion});
 
   @override
   State<ListQuestionByType> createState() => _ListQuestionByTypeState();
@@ -217,116 +376,295 @@ class ListQuestionByType extends StatefulWidget {
 class _ListQuestionByTypeState extends State<ListQuestionByType> {
   @override
   Widget build(BuildContext context) {
-      final viewModel = Provider.of<MapViewModel>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: Text(widget.title),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, widget.listQuestionByType);
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () async {
+          showDialog<void>(
+            context: context,
+            barrierDismissible:
+                false, // Người dùng phải nhấn vào một nút để đóng hộp thoại
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Xác nhận thêm'),
+                content: const SingleChildScrollView(
+                  child: ListBody(
+                    children: <Widget>[
+                      Text('Bạn muốn thêm câu hỏi mới?'),
+                    ],
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('Hủy'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  TextButton(
+                    child: const Text('Thêm'),
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditQuestionByType(
+                            title: widget.title,
+                            mapId: widget.mapId,
+                            topicId: widget.topicId,
+                            lessonId: widget.lessonId,
+                            type: widget.title,
+                            add: true,
+                            questionId: widget.questionId,
+                            typeOfQuestion: widget.typeOfQuestion,
+                          ),
+                        ),
+                      );
+
+                      if (result != null) {
+                        switch (result[2]) {
+                          case completeConversationQuestion:
+                            final updatedQuestion =
+                                result[0] as CompleteConversationQuestion;
+                            setState(() {
+                              widget.listQuestionByType.add(updatedQuestion);
+                            });
+                            break;
+                          case cardMutilChoiceQuestion:
+                            final updatedQuestion =
+                                result[0] as AnswersCardQuestion;
+                            setState(() {
+                              widget.listQuestionByType.add(updatedQuestion);
+                            });
+                            break;
+                          case completeMissingSentenceQuestion:
+                            final updatedQuestion =
+                                result[0] as CompleteConversationQuestion;
+                            setState(() {
+                              widget.listQuestionByType.add(updatedQuestion);
+                            });
+                            break;
+                          case pronunciationQuestion:
+                            final updatedQuestion =
+                                result[0] as PronunciationQuestion;
+                            setState(() {
+                              widget.listQuestionByType.add(updatedQuestion);
+                            });
+                            break;
+                          case matchingPairSoundQuestion ||
+                                matchingPairWordQuestion:
+                            final updatedQuestion =
+                                result[0] as MatchingPairQuestion;
+                            setState(() {
+                              widget.listQuestionByType.add(updatedQuestion);
+                            });
+                            break;
+                          case listenQuestion:
+                            final updatedQuestion =
+                                result[0] as ListeningQuestion;
+                            setState(() {
+                              widget.listQuestionByType.add(updatedQuestion);
+                            });
+                            break;
+                          case transerlationListenQueston ||
+                                transerlationReadQueston:
+                            final updatedQuestion =
+                                result[0] as TranslationQuestion;
+                            setState(() {
+                              widget.listQuestionByType.add(updatedQuestion);
+                            });
+                            break;
+                          case imageSelectionQuestions:
+                            final updatedQuestion =
+                                result[0] as ImageSelectionQuestion;
+                            setState(() {
+                              widget.listQuestionByType.add(updatedQuestion);
+                            });
+                            break;
+                          default:
+                        }
+                      }
+
+                      // ignore: use_build_context_synchronously
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
         child: const Icon(Icons.add),
       ),
       body: ListView.builder(
         itemCount: widget.listQuestionByType.length,
         itemBuilder: (context, index) {
           final question = widget.listQuestionByType[index];
-          return ListTile(
-            title: Text(" Câu hỏi số ${index + 1}"),
-            //  subtitle: Text(" Nội dụng câu hỏi: ${question.question}"),
-            onTap: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditQuestionByType(
-                    question: question,
-                    title: widget.title,
-                    mapId: widget.mapId,
-                    topicId: widget.topicId,
-                    lessonId: widget.lessonId,
-                    type: widget.title,
-                    index: index,
-                    add: false,
-                    questionId: widget.questionId,
+          return Card(
+            elevation: 3,
+            shadowColor: Colors.grey,
+            child: ListTile(
+              title: Text(" Câu hỏi số ${index + 1}"),
+              //  subtitle: Text(" Nội dụng câu hỏi: ${question.question}"),
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditQuestionByType(
+                      question: question,
+                      title: widget.title,
+                      mapId: widget.mapId,
+                      topicId: widget.topicId,
+                      lessonId: widget.lessonId,
+                      type: widget.title,
+                      index: index,
+                      add: false,
+                      questionId: widget.questionId,
+                      typeOfQuestion: '',
+                    ),
                   ),
-                ),
-              );
+                );
 
-              if (result != null) {
-                switch (result[2]) {
-                  case completeConversationQuestion:
-                    final updatedQuestion =
-                        result[0] as CompleteConversationQuestion;
-                    final updatedIndex = result[1] as int;
-                    setState(() {
-                      widget.listQuestionByType[updatedIndex] = updatedQuestion;
-                    });
-                    break;
-                  case cardMutilChoiceQuestion:
-                    final updatedQuestion = result[0] as AnswersCardQuestion;
-                    final updatedIndex = result[1] as int;
-                    setState(() {
-                      widget.listQuestionByType[updatedIndex] = updatedQuestion;
-                    });
-                    break;
-                  case completeMissingSentenceQuestion:
-                    final updatedQuestion =
-                        result[0] as CompleteConversationQuestion;
-                    final updatedIndex = result[1] as int;
-                    setState(() {
-                      widget.listQuestionByType[updatedIndex] = updatedQuestion;
-                    });
-                    break;
-                  case pronunciationQuestion:
-                    final updatedQuestion = result[0] as PronunciationQuestion;
-                    final updatedIndex = result[1] as int;
-                    setState(() {
-                      widget.listQuestionByType[updatedIndex] = updatedQuestion;
-                    });
-                    break;
-                  case matchingPairSoundQuestion || matchingPairWordQuestion:
-                    final updatedQuestion = result[0] as MatchingPairQuestion;
-                    final updatedIndex = result[1] as int;
-                    setState(() {
-                      widget.listQuestionByType[updatedIndex] = updatedQuestion;
-                    });
-                    break;
-                  case listenQuestion:
-                    final updatedQuestion = result[0] as ListeningQuestion;
-                    final updatedIndex = result[1] as int;
-                    setState(() {
-                      widget.listQuestionByType[updatedIndex] = updatedQuestion;
-                    });
-                    break;
-                  case transerlateListen||transerlateRead:
-                    final updatedQuestion = result[0] as TranslationQuestion;
-                    final updatedIndex = result[1] as int;
-                    setState(() {
-                      widget.listQuestionByType[updatedIndex] = updatedQuestion;
-                    });
-                    break;
-                  case imageSelectionQuestions:
-                    final updatedQuestion = result[0] as ImageSelectionQuestion;
-                    final updatedIndex = result[1] as int;
-                    setState(() {
-                      widget.listQuestionByType[updatedIndex] = updatedQuestion;
-                    });
-                    break;
-                  default:
+                if (result != null) {
+                  switch (result[2]) {
+                    case completeConversationQuestion:
+                      final updatedQuestion =
+                          result[0] as CompleteConversationQuestion;
+                      final updatedIndex = result[1] as int;
+                      setState(() {
+                        widget.listQuestionByType[updatedIndex] =
+                            updatedQuestion;
+                      });
+                      break;
+                    case cardMutilChoiceQuestion:
+                      final updatedQuestion = result[0] as AnswersCardQuestion;
+                      final updatedIndex = result[1] as int;
+                      setState(() {
+                        widget.listQuestionByType[updatedIndex] =
+                            updatedQuestion;
+                      });
+                      break;
+                    case completeMissingSentenceQuestion:
+                      final updatedQuestion =
+                          result[0] as CompleteMissingSentenceQuestion;
+                      final updatedIndex = result[1] as int;
+                      setState(() {
+                        widget.listQuestionByType[updatedIndex] =
+                            updatedQuestion;
+                      });
+                      break;
+                    case pronunciationQuestion:
+                      final updatedQuestion =
+                          result[0] as PronunciationQuestion;
+                      final updatedIndex = result[1] as int;
+                      setState(() {
+                        widget.listQuestionByType[updatedIndex] =
+                            updatedQuestion;
+                      });
+                      break;
+                    case matchingPairSoundQuestion || matchingPairWordQuestion:
+                      final updatedQuestion = result[0] as MatchingPairQuestion;
+                      final updatedIndex = result[1] as int;
+                      setState(() {
+                        widget.listQuestionByType[updatedIndex] =
+                            updatedQuestion;
+                      });
+                      break;
+                    case listenQuestion:
+                      final updatedQuestion = result[0] as ListeningQuestion;
+                      final updatedIndex = result[1] as int;
+                      setState(() {
+                        widget.listQuestionByType[updatedIndex] =
+                            updatedQuestion;
+                      });
+                      break;
+                    case transerlationListenQueston || transerlationReadQueston:
+                      final updatedQuestion = result[0] as TranslationQuestion;
+                      final updatedIndex = result[1] as int;
+                      setState(() {
+                        widget.listQuestionByType[updatedIndex] =
+                            updatedQuestion;
+                      });
+                      break;
+                    case imageSelectionQuestions:
+                      final updatedQuestion =
+                          result[0] as ImageSelectionQuestion;
+                      final updatedIndex = result[1] as int;
+                      setState(() {
+                        widget.listQuestionByType[updatedIndex] =
+                            updatedQuestion;
+                      });
+                      break;
+                    default:
+                  }
                 }
-              }
-            },
-            trailing: ElevatedButton.icon(
-              onPressed: () {
-                  viewModel.deleteQuestion(widget.mapId,widget. topicId,widget.lessonId,widget.questionId, question,index,);
-                  question.removeAt(index);
-                  Navigator.pop(context,question);
               },
-              icon: const Icon(Icons.delete_forever),
-              label: const Text("Xóa"),
+              trailing: IconButton(
+                onPressed: () {
+                  _showDeleteConfirmationDialog(context, index, question);
+                },
+                icon: const Icon(Icons.delete_forever),
+              ),
             ),
           );
         },
       ),
+    );
+  }
+
+  Future<void> _showDeleteConfirmationDialog(
+      BuildContext context, int index, dynamic question) async {
+    final viewModel = Provider.of<MapViewModel>(context, listen: false);
+    return showDialog<void>(
+      context: context,
+      barrierDismissible:
+          false, // Người dùng phải nhấn vào một nút để đóng hộp thoại
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Xác nhận xóa'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Bạn có chắc chắn muốn xóa câu hỏi này không?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Hủy'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Xóa'),
+              onPressed: () {
+                setState(() {
+                  widget.listQuestionByType.removeAt(index);
+                });
+                viewModel.deleteQuestion(
+                  widget.mapId,
+                  widget.topicId,
+                  widget.lessonId,
+                  widget.questionId,
+                  question,
+                  index,
+                );
+
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -339,21 +677,23 @@ class EditQuestionByType extends StatefulWidget {
   final dynamic question; // câu hỏi để cần cập nhật
   final String title;
   final String type;
+  final String typeOfQuestion;
   final int index;
 
   ///vị trí câu hỏi cần update trong list
   final String questionId;
   const EditQuestionByType(
       {super.key,
-      required this.question,
+      this.question,
       required this.title,
       required this.mapId,
       required this.topicId,
       required this.lessonId,
       required this.type,
-      required this.index,
+      this.index = 0,
       required this.add,
-      required this.questionId});
+      required this.questionId,
+      required this.typeOfQuestion});
 
   @override
   State<EditQuestionByType> createState() => _EditQuestionByTypeState();
@@ -371,11 +711,12 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
     matchingPairSoundQuestion,
     matchingPairWordQuestion
   ];
+  Random random = Random();
   List<String> optionTypeCodeOfTranselationQuestion = [
-    transerlateListen,
-    transerlateRead
+    transerlationReadQueston,
+    transerlationReadQueston
   ];
-
+  String typesection = '';
   Future<void> getImage(int index) async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -477,51 +818,70 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
   @override
   void initState() {
     super.initState();
-
-    if (widget.question.typeOfQuestion == imageSelectionQuestions) {
-      textEditList[4].text =
-          widget.question.expectedWord + ';' + widget.question.correctAnswer;
-      for (int i = 0; i < images.length; i++) {
-        textEditList[i].text = widget.question.items[i]['mean'] +
-            ';' +
-            widget.question.items[i]['text'];
-        images[i] = images[i] ?? widget.question.items[i]['image'];
+    typesection =
+        widget.add ? widget.typeOfQuestion : widget.question.typeOfQuestion;
+    if (widget.add == false) {
+      if (typesection == imageSelectionQuestions) {
+        textEditList[4].text =
+            widget.question.expectedWord + ';' + widget.question.correctAnswer;
+        for (int i = 0; i < images.length; i++) {
+          textEditList[i].text = widget.question.items[i]['mean'] +
+              ';' +
+              widget.question.items[i]['text'];
+          images[i] = images[i] ?? widget.question.items[i]['image'];
+        }
+      }
+      if (typesection == matchingPairSoundQuestion ||
+          typesection == matchingPairWordQuestion) {
+        for (int i = 0; i < widget.question.items.length; i += 2) {
+          textEditList[0].text += widget.question.items[i]['text'] + ';';
+          textEditList[1].text += widget.question.items[i]['mean'] + ';';
+        }
+        textEditList[0].text =
+            textEditList[0].text.substring(0, textEditList[0].text.length - 1);
+        textEditList[1].text =
+            textEditList[1].text.substring(0, textEditList[1].text.length - 1);
+        optionType = ['Nghe từ ghép cặp', 'Đọc từ ghép cặp'];
+        selectedValue =
+            optionType[optionTypeCodeOfMatchingQuestion.indexOf(typesection)];
+      }
+      if (typesection == transerlationReadQueston ||
+          typesection == transerlationReadQueston) {
+        textEditList[0].text = widget.question.question;
+        textEditList[1].text = widget.question.mean;
+        textEditList[2].text = widget.question.answers.join(";");
+        optionType = ['Nghe câu ghép từ', 'Dịch câu ghép từ'];
+        selectedValue = optionType[
+            optionTypeCodeOfTranselationQuestion.indexOf(typesection)];
       }
     }
-    if (widget.question.typeOfQuestion == matchingPairSoundQuestion ||
-        widget.question.typeOfQuestion == matchingPairWordQuestion) {
-      for (int i = 0; i < widget.question.items.length; i += 2) {
-        textEditList[0].text += widget.question.items[i]['text'] + ';';
-        textEditList[1].text += widget.question.items[i]['mean'] + ';';
-      }
-      textEditList[0].text =  textEditList[0].text.substring(0,textEditList[0].text.length-1);
-      textEditList[1].text =  textEditList[1].text.substring(0,textEditList[1].text.length-1);
+    if (typesection == matchingPairSoundQuestion ||
+        typesection == matchingPairWordQuestion) {
       optionType = ['Nghe từ ghép cặp', 'Đọc từ ghép cặp'];
-      selectedValue = optionType[optionTypeCodeOfMatchingQuestion
-          .indexOf(widget.question.typeOfQuestion)];
+      selectedValue =
+          optionType[optionTypeCodeOfMatchingQuestion.indexOf(typesection)];
     }
-    if (widget.question.typeOfQuestion == transerlateListen ||
-        widget.question.typeOfQuestion == transerlateRead) {
-      
-      textEditList[0].text = widget.question.question;
-      textEditList[1].text = widget.question.mean;
-      textEditList[2].text = widget.question.answers.join(";");
+    if (typesection == transerlationReadQueston ||
+        typesection == transerlationReadQueston) {
       optionType = ['Nghe câu ghép từ', 'Dịch câu ghép từ'];
-      selectedValue = optionType[optionTypeCodeOfTranselationQuestion
-          .indexOf(widget.question.typeOfQuestion)];
+      selectedValue =
+          optionType[optionTypeCodeOfTranselationQuestion.indexOf(typesection)];
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<MapViewModel>(context, listen: false);
-    switch (widget.question.typeOfQuestion) {
+
+    switch (typesection) {
       case completeConversationQuestion:
-        textEditList[0].text = widget.question.question['text'];
-        textEditList[1].text = widget.question.question['mean'];
-        textEditList[2].text = widget.question.correctAnswer['text'];
-        textEditList[3].text = widget.question.correctAnswer['mean'];
-        textEditList[4].text = widget.question.items.join(';');
+        if (widget.add == false) {
+          textEditList[0].text = widget.question.question['text'];
+          textEditList[1].text = widget.question.question['mean'];
+          textEditList[2].text = widget.question.correctAnswer['text'];
+          textEditList[3].text = widget.question.correctAnswer['mean'];
+          textEditList[4].text = widget.question.items.join(';');
+        }
         return Scaffold(
           appBar: AppBar(),
           body: SingleChildScrollView(
@@ -530,8 +890,7 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    Text(
-                        'Chỉnh sửa câu hỏi ${widget.index + 1} loại ${widget.title}'),
+                    Text('Câu hỏi ${widget.index + 1} ${widget.title}'),
                     TextField(
                       controller: textEditList[0],
                       decoration: const InputDecoration(
@@ -588,25 +947,34 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                         };
                         List<String> items = textEditList[4].text.split(';');
                         final updateQuestion = CompleteConversationQuestion(
-                            typeOfQuestion: widget.question.typeOfQuestion,
+                            typeOfQuestion: typesection,
                             question: question1,
                             correctAnswer: correctAnswer,
                             items: items);
-                        viewModel.updateQuestion(
-                            widget.mapId,
-                            widget.topicId,
-                            widget.lessonId,
-                            updateQuestion,
-                            widget.index,
-                            widget.questionId);
+                        widget.add
+                            ? viewModel.addQuestion(
+                                widget.mapId,
+                                widget.topicId,
+                                widget.lessonId,
+                                updateQuestion,
+                                widget.index,
+                                widget.questionId)
+                            : viewModel.updateQuestion(
+                                widget.mapId,
+                                widget.topicId,
+                                widget.lessonId,
+                                updateQuestion,
+                                widget.index,
+                                widget.questionId);
                         List<dynamic> backData = [
                           updateQuestion,
                           widget.index,
-                          widget.question.typeOfQuestion
+                          typesection
                         ];
                         Navigator.pop(context, backData);
                       },
-                      child: const Text('Sửa câu hỏi'),
+                      child:
+                          Text(widget.add ? ' Thêm câu hỏi' : 'Lưu thay đổi'),
                     ),
                   ],
                 )),
@@ -640,7 +1008,7 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                     controller: textEditList[2],
                     decoration: const InputDecoration(
                         labelText:
-                            'Nhập các từ để ghép thành đáp án(ví dụ: cat;car)'),
+                            'Nhập các từ để ghép thành đáp án(ví dụ: bạn;ăn;cơm;gì?)'),
                   ),
                   const SizedBox(
                     height: 10,
@@ -666,25 +1034,33 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                       List<String> items = textEditList[2].text.split(';');
                       final newQuestion = TranslationQuestion(
                           answers: items,
-                          typeOfQuestion:  optionTypeCodeOfTranselationQuestion[optionType
-          .indexOf(selectedValue)],
+                          typeOfQuestion: optionTypeCodeOfTranselationQuestion[
+                              optionType.indexOf(selectedValue)],
                           question: textEditList[0].text,
                           mean: textEditList[1].text);
-                      viewModel.updateQuestion(
-                          widget.mapId,
-                          widget.topicId,
-                          widget.lessonId,
-                          newQuestion,
-                          widget.index,
-                          widget.questionId);
+                      widget.add
+                          ? viewModel.addQuestion(
+                              widget.mapId,
+                              widget.topicId,
+                              widget.lessonId,
+                              newQuestion,
+                              widget.index,
+                              widget.questionId)
+                          : viewModel.updateQuestion(
+                              widget.mapId,
+                              widget.topicId,
+                              widget.lessonId,
+                              newQuestion,
+                              widget.index,
+                              widget.questionId);
                       List<dynamic> backData = [
                         newQuestion,
                         widget.index,
-                        widget.question.typeOfQuestion
+                        typesection
                       ];
                       Navigator.pop(context, backData);
                     },
-                    child: const Text('Sửa câu hỏi'),
+                    child: Text(widget.add ? "Thêm câu hỏi" : "Lưu thay đổi"),
                   ),
                 ],
               )),
@@ -747,37 +1123,61 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                                 textEditList[0].text.split(';');
                             List<String> listSplitVienamese =
                                 textEditList[1].text.split(';');
+                            List<Map<String, String>> itemsLeft = [];
+                            List<Map<String, String>> itemsRight = [];
                             List<Map<String, String>> items = [];
                             for (int i = 0; i < listSplitEnglish.length; i++) {
-                              items.add({
+                              itemsLeft.add({
                                 'text': listSplitEnglish[i],
                                 'mean': listSplitVienamese[i]
                               });
-                              items.add({
+                              itemsRight.add({
                                 'mean': listSplitEnglish[i],
                                 'text': listSplitVienamese[i]
                               });
                             }
+                            itemsLeft.shuffle(random);
+                            itemsRight.shuffle(random);
+                            for (int i = 0; i < listSplitEnglish.length; i++) {
+                              items.add({
+                                'text': itemsLeft[i]['text']!,
+                                'mean': itemsLeft[i]['mean']!
+                              });
+                              items.add({
+                                'mean': itemsRight[i]['mean']!,
+                                'text': itemsRight[i]['text']!
+                              });
+                            }
+
                             final newQuestion = MatchingPairQuestion(
-                              typeOfQuestion:  optionTypeCodeOfMatchingQuestion[optionType
-          .indexOf(selectedValue)],
+                              typeOfQuestion: optionTypeCodeOfMatchingQuestion[
+                                  optionType.indexOf(selectedValue)],
                               items: items,
                             );
-                            viewModel.updateQuestion(
-                                widget.mapId,
-                                widget.topicId,
-                                widget.lessonId,
-                                newQuestion,
-                                widget.index,
-                                widget.questionId);
+                            widget.add
+                                ? viewModel.addQuestion(
+                                    widget.mapId,
+                                    widget.topicId,
+                                    widget.lessonId,
+                                    newQuestion,
+                                    widget.index,
+                                    widget.questionId)
+                                : viewModel.updateQuestion(
+                                    widget.mapId,
+                                    widget.topicId,
+                                    widget.lessonId,
+                                    newQuestion,
+                                    widget.index,
+                                    widget.questionId);
                             List<dynamic> backData = [
                               newQuestion,
                               widget.index,
-                              widget.question.typeOfQuestion
+                              typesection
                             ];
                             Navigator.pop(context, backData);
                           },
-                          child: const Text('Sửa câu hỏi'),
+                          child: Text(
+                              widget.add ? "Thêm câu hỏi" : "Lưu thay đổi"),
                         ),
                       ],
                     ))
@@ -787,8 +1187,10 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
           ),
         );
       case listenQuestion:
-        textEditList[0].text = widget.question.correctAnswer;
-        textEditList[1].text = widget.question.items.join(";");
+        if (widget.add == false) {
+          textEditList[0].text = widget.question.correctAnswer;
+          textEditList[1].text = widget.question.items.join(";");
+        }
         return Scaffold(
           appBar: AppBar(),
           body: SingleChildScrollView(
@@ -819,24 +1221,32 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                       onPressed: () async {
                         List<String> items = textEditList[1].text.split(';');
                         final newQuestion = ListeningQuestion(
-                            typeOfQuestion: widget.question.typeOfQuestion,
+                            typeOfQuestion: typesection,
                             correctAnswer: textEditList[0].text,
                             items: items);
-                        viewModel.updateQuestion(
-                            widget.mapId,
-                            widget.topicId,
-                            widget.lessonId,
-                            newQuestion,
-                            widget.index,
-                            widget.questionId);
+                        widget.add
+                            ? viewModel.addQuestion(
+                                widget.mapId,
+                                widget.topicId,
+                                widget.lessonId,
+                                newQuestion,
+                                widget.index,
+                                widget.questionId)
+                            : viewModel.updateQuestion(
+                                widget.mapId,
+                                widget.topicId,
+                                widget.lessonId,
+                                newQuestion,
+                                widget.index,
+                                widget.questionId);
                         List<dynamic> backData = [
                           newQuestion,
                           widget.index,
-                          widget.question.typeOfQuestion
+                          typesection
                         ];
                         Navigator.pop(context, backData);
                       },
-                      child: const Text('Sửa câu hỏi'),
+                      child: Text(widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi'),
                     ),
                   ],
                 )),
@@ -966,8 +1376,7 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
 
                                   // Create the updated question object
                                   final updateQuestion = ImageSelectionQuestion(
-                                    typeOfQuestion:
-                                        widget.question.typeOfQuestion,
+                                    typeOfQuestion: typesection,
                                     expectedWord:
                                         textEditList[4].text.split(";")[0],
                                     correctAnswer:
@@ -976,20 +1385,29 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                                   );
 
                                   // Update the question in the view model
-                                  viewModel.updateQuestion(
-                                    widget.mapId,
-                                    widget.topicId,
-                                    widget.lessonId,
-                                    updateQuestion,
-                                    widget.index,
-                                    widget.questionId,
-                                  );
+                                  widget.add
+                                      ? viewModel.addQuestion(
+                                          widget.mapId,
+                                          widget.topicId,
+                                          widget.lessonId,
+                                          updateQuestion,
+                                          widget.index,
+                                          widget.questionId,
+                                        )
+                                      : viewModel.updateQuestion(
+                                          widget.mapId,
+                                          widget.topicId,
+                                          widget.lessonId,
+                                          updateQuestion,
+                                          widget.index,
+                                          widget.questionId,
+                                        );
 
                                   // Prepare data to send back
                                   List<dynamic> backData = [
                                     updateQuestion,
                                     widget.index,
-                                    widget.question.typeOfQuestion,
+                                    typesection,
                                   ];
                                   setState(() {
                                     isLoading = false;
@@ -1001,7 +1419,8 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                                 }
                               }
                             },
-                            child: const Text('Sửa câu hỏi'),
+                            child: Text(
+                                widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi'),
                           ),
                         ],
                       ))
@@ -1010,8 +1429,11 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                     ),
             ));
       case pronunciationQuestion:
-        textEditList[0].text = widget.question.sampleText;
-        textEditList[1].text = widget.question.mean;
+        if (!widget.add) {
+          textEditList[0].text = widget.question.sampleText;
+          textEditList[1].text = widget.question.mean;
+        }
+
         return Scaffold(
             appBar: AppBar(),
             body: SingleChildScrollView(
@@ -1041,26 +1463,35 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                           ),
                           ElevatedButton(
                             onPressed: () async {
-                              final updateQuestion = PronunciationQuestion(
-                                typeOfQuestion: widget.question.typeOfQuestion,
+                              final newQuestion = PronunciationQuestion(
+                                typeOfQuestion: typesection,
                                 sampleText: textEditList[0].text,
                                 mean: textEditList[1].text,
                               );
-                              viewModel.updateQuestion(
-                                  widget.mapId,
-                                  widget.topicId,
-                                  widget.lessonId,
-                                  updateQuestion,
-                                  widget.index,
-                                  widget.questionId);
+                              widget.add
+                                  ? viewModel.addQuestion(
+                                      widget.mapId,
+                                      widget.topicId,
+                                      widget.lessonId,
+                                      newQuestion,
+                                      widget.index,
+                                      widget.questionId)
+                                  : viewModel.updateQuestion(
+                                      widget.mapId,
+                                      widget.topicId,
+                                      widget.lessonId,
+                                      newQuestion,
+                                      widget.index,
+                                      widget.questionId);
                               List<dynamic> backData = [
-                                updateQuestion,
+                                newQuestion,
                                 widget.index,
-                                widget.question.typeOfQuestion
+                                typesection
                               ];
                               Navigator.pop(context, backData);
                             },
-                            child: const Text('Sửa câu hỏi'),
+                            child: Text(
+                                widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi'),
                           ),
                         ],
                       ))
@@ -1069,9 +1500,12 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                     ),
             ));
       case completeMissingSentenceQuestion:
-        textEditList[2].text = widget.question.expectedSentence;
-        textEditList[0].text = widget.question.missingSentence;
-        textEditList[1].text = widget.question.correctanswers;
+        if (!widget.add) {
+          textEditList[2].text = widget.question.expectedSentence;
+          textEditList[0].text = widget.question.missingSentence;
+          textEditList[1].text = widget.question.correctanswers;
+        }
+
         return Scaffold(
             appBar: AppBar(),
             body: SingleChildScrollView(
@@ -1111,26 +1545,34 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                             onPressed: () async {
                               final newQuestion =
                                   CompleteMissingSentenceQuestion(
-                                      typeOfQuestion:
-                                          widget.question.typeOfQuestion,
+                                      typeOfQuestion: typesection,
                                       expectedSentence: textEditList[2].text,
                                       missingSentence: textEditList[0].text,
                                       correctanswers: textEditList[1].text);
-                              viewModel.updateQuestion(
-                                  widget.mapId,
-                                  widget.topicId,
-                                  widget.lessonId,
-                                  newQuestion,
-                                  widget.index,
-                                  widget.questionId);
+                              widget.add
+                                  ? viewModel.addQuestion(
+                                      widget.mapId,
+                                      widget.topicId,
+                                      widget.lessonId,
+                                      newQuestion,
+                                      widget.index,
+                                      widget.questionId)
+                                  : viewModel.updateQuestion(
+                                      widget.mapId,
+                                      widget.topicId,
+                                      widget.lessonId,
+                                      newQuestion,
+                                      widget.index,
+                                      widget.questionId);
                               List<dynamic> backData = [
                                 newQuestion,
                                 widget.index,
-                                widget.question.typeOfQuestion
+                                typesection
                               ];
                               Navigator.pop(context, backData);
                             },
-                            child: const Text('Sửa câu hỏi'),
+                            child: Text(
+                                widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi'),
                           ),
                         ],
                       ))
@@ -1139,9 +1581,12 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                     ),
             ));
       case cardMutilChoiceQuestion:
-        textEditList[0].text = widget.question.question;
-        textEditList[1].text = widget.question.correctAnswer;
-        textEditList[2].text = widget.question.answers.join(';');
+        if (!widget.add) {
+          textEditList[0].text = widget.question.question;
+          textEditList[1].text = widget.question.correctAnswer;
+          textEditList[2].text = widget.question.answers.join(';');
+        }
+
         return Scaffold(
           appBar: AppBar(),
           body: SingleChildScrollView(
@@ -1183,25 +1628,34 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                             List<String> items =
                                 textEditList[2].text.split(';');
                             final newQuestion = AnswersCardQuestion(
-                                typeOfQuestion: widget.question.typeOfQuestion,
+                                typeOfQuestion: typesection,
                                 question: textEditList[0].text,
                                 correctAnswer: textEditList[1].text,
                                 answers: items);
-                            viewModel.updateQuestion(
-                                widget.mapId,
-                                widget.topicId,
-                                widget.lessonId,
-                                newQuestion,
-                                widget.index,
-                                widget.questionId);
+                            widget.add
+                                ? viewModel.addQuestion(
+                                    widget.mapId,
+                                    widget.topicId,
+                                    widget.lessonId,
+                                    newQuestion,
+                                    widget.index,
+                                    widget.questionId)
+                                : viewModel.updateQuestion(
+                                    widget.mapId,
+                                    widget.topicId,
+                                    widget.lessonId,
+                                    newQuestion,
+                                    widget.index,
+                                    widget.questionId);
                             List<dynamic> backData = [
                               newQuestion,
                               widget.index,
-                              widget.question.typeOfQuestion
+                              typesection
                             ];
                             Navigator.pop(context, backData);
                           },
-                          child: const Text('Sửa câu hỏi'),
+                          child: Text(
+                              widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi'),
                         ),
                       ],
                     ))
@@ -1213,118 +1667,8 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
       default:
         return const Scaffold(
             body: Center(
-          child: Text("No avaiable question "),
+          child: Text("Không có câu hỏi nào loại này "),
         ));
     }
   }
-
-/*class AddQuestionScreen extends StatefulWidget {
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _titleController = TextEditingController();
-  final String type;
-  final String mapId;
-  final String topicId;
-  final LessonModel lesson;
-
-  AddQuestionScreen(
-      {super.key,
-      required this.type,
-      required this.mapId,
-      required this.topicId,
-      required this.lesson});
-
-  @override
-  State<AddQuestionScreen> createState() => _AddQuestionScreenState();
-}
-
-class _AddQuestionScreenState extends State<AddQuestionScreen> {
-  File? _image;
-  final picker = ImagePicker();
-
-  Future getImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      } else {
-        //print('No image selected.');
-      }
-    });
-  }
-
-  Future<String> uploadImageToFirebase(File image) async {
-    final fileName = image.path.split('/').last;
-    final storageRef = FirebaseStorage.instance.ref().child('images/$fileName');
-    final uploadTask = storageRef.putFile(image);
-    final snapshot = await uploadTask;
-    final downloadUrl = await snapshot.ref.getDownloadURL();
-    return downloadUrl;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final viewModel = Provider.of<MapViewModel>(context, listen: false);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Thêm Lesson'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            TextField(
-              controller: widget._titleController,
-              decoration: const InputDecoration(labelText: 'Tiêu đề'),
-            ),
-            TextField(
-              controller: widget._descriptionController,
-              decoration: const InputDecoration(labelText: 'Mô tả'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: getImage,
-              child: const Text('Chọn ảnh từ thư viện'),
-            ),
-            const SizedBox(height: 20),
-            if (_image != null)
-              ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(60), // Điều chỉnh bán kính nếu cần
-                child: Image.file(
-                  _image!,
-                  width: 80, // Điều chỉnh chiều rộng nếu cần
-                  height: 80, // Điều chỉnh chiều cao nếu cần
-                  fit: BoxFit.cover, // Điều chỉnh fit nếu cần
-                ),
-              ),
-            const SizedBox(height:10),
-            ElevatedButton(
-              onPressed: () async {
-                if (_image != null) {
-                  final imageUrl = await uploadImageToFirebase(_image!);
-                  LessonModel newLesson = LessonModel(
-                    id: '',
-                    title: widget._titleController.text,
-                    description: widget._descriptionController.text,
-                    question: [],
-                    images: imageUrl, // Lưu URL hình ảnh
-                    color: widget.topic.color,
-                  );
-
-                  viewModel.addLesson(widget.mapId, widget.topic.id, newLesson);
-                  // ignore: use_build_context_synchronously
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Thêm Lesson'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}*/
 }

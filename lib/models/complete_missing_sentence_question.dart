@@ -1,6 +1,7 @@
 // complete_missing_sentence_question.g.dart
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:maple/utils/constants.dart';
 
 part 'complete_missing_sentence_question.g.dart';
 
@@ -12,7 +13,7 @@ class CompleteMissingSentenceQuestion {
   final String correctanswers;
 
   CompleteMissingSentenceQuestion({
-    required this.typeOfQuestion,
+     this.typeOfQuestion = completeMissingSentenceQuestion,
     required this.expectedSentence,
     required this.missingSentence,
     required this.correctanswers,

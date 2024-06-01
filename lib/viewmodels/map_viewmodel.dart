@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:maple/models/answers_card_question.dart';
-import 'package:maple/models/complete_conversation_question.dart';
-import 'package:maple/models/complete_missing_sentence_question.dart';
 import 'package:maple/models/lessonmodel.dart';
-import 'package:maple/models/listening_question.dart';
 import 'package:maple/models/mapmodel.dart';
-import 'package:maple/models/matching_pair_question.dart';
-import 'package:maple/models/pronunciation_question.dart';
 import 'package:maple/models/questionmodel.dart';
 import 'package:maple/models/topicmodel.dart';
-import 'package:maple/models/translation_question.dart';
 import 'package:maple/repositories/map_repository.dart';
 import 'package:maple/utils/constants.dart';
 
@@ -35,7 +28,14 @@ class MapViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-
+Future<MapModel?> getMapById(String mapId) async {
+    try {
+      final map = await _repository.getMapById(mapId);
+      return map;
+    } catch (e) {
+      throw Exception('Failed to fetch map: $e');
+    }
+  }
   Future<void> addMap(MapModel map) async {
     await _repository.addMap(map);
     await fetchMaps();
@@ -45,7 +45,10 @@ class MapViewModel extends ChangeNotifier {
     if (maps.isEmpty) {
       return "1";
     }
-    return (maps.length + 1).toString();
+    int maxId = maps.isNotEmpty
+        ? maps.map((map) => int.parse(map.id)).reduce((a, b) => a > b ? a : b)
+        : 0;
+    return (maxId + 1).toString();
   }
 
   Future<void> updateMap(MapModel map) async {
@@ -58,19 +61,45 @@ class MapViewModel extends ChangeNotifier {
     await fetchMaps();
   }
 
+
+
+  String newIdQuestion(
+    String mapId,
+    String topicId,
+    String lessonId,
+  ) {
+    MapModel? map = _maps.firstWhere((map) => map.id == mapId);
+
+    // Tìm topic theo id trong map đã tìm
+    TopicModel? topic = map.topics.firstWhere((topic) => topic.id == topicId);
+
+    // Tìm lesson theo id trong topic đã tìm
+    LessonModel? lesson =
+        topic.lessons.firstWhere((lesson) => lesson.id == lessonId);
+
+    // Tìm id lớn nhất trong danh sách các câu hỏi hiện có
+    int maxId = lesson.question.isNotEmpty
+        ? lesson.question
+            .map((question) => int.parse(question.id))
+            .reduce((a, b) => a > b ? a : b)
+        : 0;
+
+    return (maxId + 1).toString();
+  }
+
   Future<void> addListQuestion(String mapId, String topicId, String lessonId,
       QuestionModel newListQuestion) async {
     MapModel? map = _maps.firstWhere((map) => map.id == mapId);
     TopicModel? topic = map.topics.firstWhere((topic) => topic.id == topicId);
     LessonModel? lesson =
         topic.lessons.firstWhere((lesson) => lesson.id == lessonId);
-
+    
     lesson.question.add(newListQuestion);
     await _repository.updateLesson(mapId, topicId, lesson);
     await fetchMaps();
   }
 
-  Future<void> updateQuestion(String mapId, String topicId, String lessonId,
+  Future<void> addQuestion(String mapId, String topicId, String lessonId,
       dynamic updateQuestion, int index, String questionId) async {
     MapModel? map = _maps.firstWhere((map) => map.id == mapId);
     TopicModel? topic = map.topics.firstWhere((topic) => topic.id == topicId);
@@ -87,9 +116,60 @@ class MapViewModel extends ChangeNotifier {
     //  String typeOfQuestion = updateQuestion.typeOfQuestion;
     switch (updateQuestion.typeOfQuestion) {
       case completeConversationQuestion:
+        questionModel.completeConversationQuestions.add(updateQuestion);
+        break;
+      case transerlationReadQueston:
+        questionModel.translationQuestions.add(updateQuestion);
+        break;
+      case transerlationListenQueston:
+        questionModel.translationQuestions.add(updateQuestion);
+        break;
+      case matchingPairWordQuestion:
+        questionModel.matchingPairQuestions.add(updateQuestion);
+
+        break;
+      case matchingPairSoundQuestion:
+        questionModel.matchingPairQuestions.add(updateQuestion);
+
+        break;
+      case listenQuestion:
+        questionModel.listeningQuestions.add(updateQuestion);
+
+        break;
+      case imageSelectionQuestions:
+        questionModel.imageSelectionQuestions.add(updateQuestion);
+
+        break;
+      case pronunciationQuestion:
+        questionModel.pronunciationQuestions.add(updateQuestion);
+
+        break;
+      case completeMissingSentenceQuestion:
+        questionModel.completeMissingSentenceQuestions.add(updateQuestion);
+
+        break;
+      case cardMutilChoiceQuestion:
+        questionModel.answersCardQuestions.add(updateQuestion);
+        break;
+      default:
+        break;
+    }
+    await _repository.updateQuestion(mapId, topicId, lessonId, questionModel);
+    await fetchMaps();
+  }
+
+  Future<void> updateQuestion(String mapId, String topicId, String lessonId,
+      dynamic updateQuestion, int index, String questionId) async {
+    MapModel? map = _maps.firstWhere((map) => map.id == mapId);
+    TopicModel? topic = map.topics.firstWhere((topic) => topic.id == topicId);
+    LessonModel? lesson =
+        topic.lessons.firstWhere((lesson) => lesson.id == lessonId);
+    QuestionModel questionModel =
+        lesson.question.firstWhere((question) => question.id == questionId);
+ 
+    switch (updateQuestion.typeOfQuestion) {
+      case completeConversationQuestion:
         questionModel.completeConversationQuestions[index] = updateQuestion;
-        // updatedQuestions =List.from(questionModel.completeConversationQuestions)
-        //       ..add(updateQuestion);
         break;
       case transerlationReadQueston:
         questionModel.translationQuestions[index] = updateQuestion;
@@ -156,24 +236,26 @@ class MapViewModel extends ChangeNotifier {
     await _repository.updateLesson(mapId, topicId, lesson);
     await fetchMaps();
   }
-  Future<void> deleteQuestion(
-      String mapId, String topicId, String lessonId, String questionId,dynamic question,int index) async {
+
+  Future<void> deleteQuestion(String mapId, String topicId, String lessonId,
+      String questionId, dynamic question, int index) async {
     MapModel? map = _maps.firstWhere((map) => map.id == mapId);
     TopicModel? topic = map.topics.firstWhere((topic) => topic.id == topicId);
     LessonModel? lesson =
         topic.lessons.firstWhere((lesson) => lesson.id == lessonId);
-    
-   QuestionModel listQuestion = lesson.question.firstWhere((question) => question.id == questionId);
+
+    QuestionModel listQuestion =
+        lesson.question.firstWhere((question) => question.id == questionId);
     switch (question.typeOfQuestion) {
-     case completeConversationQuestion:
+      case completeConversationQuestion:
         listQuestion.completeConversationQuestions.removeAt(index);
         // updatedQuestions =List.from(listQuestion.completeConversationQuestions)
         //       ..add(updateQuestion);
         break;
-      case transerlationReadQueston ||transerlationListenQueston:
+      case transerlationReadQueston || transerlationListenQueston:
         listQuestion.translationQuestions.removeAt(index);
         break;
-     
+
       case matchingPairWordQuestion || matchingPairSoundQuestion:
         listQuestion.matchingPairQuestions.removeAt(index);
 
@@ -200,7 +282,7 @@ class MapViewModel extends ChangeNotifier {
       default:
         break;
     }
-    await _repository.updateQuestion(mapId, topicId, lessonId,listQuestion);
+    await _repository.updateQuestion(mapId, topicId, lessonId, listQuestion);
     await fetchMaps();
   }
 
@@ -233,21 +315,22 @@ class MapViewModel extends ChangeNotifier {
     await fetchMaps();
   }
 
-  Future<void> addTopic(String mapId, TopicModel newTopic) async {
+  String newIdTopic(
+    String mapId,
+  ) {
     MapModel? map = _maps.firstWhere((map) => map.id == mapId);
-    String newTopicId = "1";
+
     int maxTopicId = map.topics.isNotEmpty
         ? map.topics
             .map((topic) => int.parse(topic.id))
             .reduce((a, b) => a > b ? a : b)
         : 0;
-    newTopicId = (maxTopicId + 1).toString();
-    final newTopic1 = TopicModel(
-        id: newTopicId,
-        description: newTopic.description,
-        lessons: newTopic.lessons,
-        color: newTopic.color);
-    await _repository.addTopic(mapId, newTopic1);
+    String newTopicId = (maxTopicId + 1).toString();
+    return newTopicId;
+  }
+
+  Future<void> addTopic(String mapId, TopicModel newTopic) async {
+    await _repository.addTopic(mapId, newTopic);
     await fetchMaps();
   }
 
@@ -263,6 +346,4 @@ class MapViewModel extends ChangeNotifier {
     );
     await fetchMaps();
   }
-
-
 }

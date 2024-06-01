@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_color/flutter_color.dart';
 import 'package:maple/models/mapmodel.dart';
 import 'package:maple/models/topicmodel.dart';
+import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:maple/viewmodels/map_viewmodel.dart';
 import 'package:maple/viewmodels/topic_viewmodel.dart';
 import 'package:maple/views/admin/static_view.dart';
@@ -33,7 +34,12 @@ class _TopicListScreenState extends State<TopicListScreen> {
     final viewModel = Provider.of<MapViewModel>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
-        leading: const Text(""),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, widget.mapModel);
+          },
+        ),
         centerTitle: true,
         title: Text(widget.mapModel.description),
       ),
@@ -60,15 +66,9 @@ class _TopicListScreenState extends State<TopicListScreen> {
         itemBuilder: (context, index) {
           final topic = topics[index];
           return StatisticsCard(
-            title: topic.description,
-            progress: const ProgressIndicatorCustom(
-              progress: 70,
-              size: 20,
-              displayText: '%',
-            ),
             topic: topic,
-            color: HexColor(topic.color),
             mapId: widget.mapModel.id,
+            index:index,
             onDelete: (TopicModel topic) {
               setState(() {
                 viewModel.deleteTopic(widget.mapModel.id, topic.id);
@@ -88,14 +88,21 @@ class _TopicListScreenState extends State<TopicListScreen> {
 }
 
 class StatisticsCard extends StatefulWidget {
-  final String title;
   final TopicModel topic;
-  final Widget progress;
-  final Color color;
   final String mapId;
+  final int index;
   final Function onDelete;
   final Function onEdit;
-  const StatisticsCard({super.key, required this.title, required this.topic, required this.progress, required this.color, required this.mapId, required this.onDelete, required this.onEdit});
+  
+
+  const StatisticsCard({
+    super.key,
+    required this.topic,
+    required this.mapId,
+    required this.onDelete,
+    required this.onEdit,
+    required this.index,
+  });
 
   @override
   State<StatisticsCard> createState() => _StatisticsCardState();
@@ -105,19 +112,26 @@ class _StatisticsCardState extends State<StatisticsCard> {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<TopicViewModel>(context, listen: false);
+     final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+    bool isUser = authViewModel.isUser();
     return GestureDetector(
       onTap: () async {
-        await Navigator.push(
+     final result =   await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => LessonListScreen(topic: widget.topic, mapId: widget.mapId),
           ),
         );
+        if(result != null){
+            
+              widget.onEdit(result as TopicModel);
+            
+        }
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Card(
-          color: widget.color,
+          color: HexColor(widget.topic.color),
           shadowColor: Colors.grey,
           elevation: 5,
           child: Padding(
@@ -132,27 +146,36 @@ class _StatisticsCardState extends State<StatisticsCard> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
                         child: Text(
-                          widget.title,
+                          "Cửa ${widget.index + 1}: ${widget.topic.description}",
                           style: const TextStyle(
-                              fontFamily: 'Roboto',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: Colors.white),
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        child: widget.progress,
+                        Visibility(
+                        visible: isUser,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 8.0),
+                          child: ProgressIndicatorCustom(
+                            progress: 70,
+                            size: 20,
+                            displayText: '%',
+                          ),
+                        ),
                       ),
-                      Row(
+                      Visibility(
+                        visible: !isUser,
+                        child:  Row(
                         children: [
                           IconButton(
                             onPressed: () {
-                              viewModel.deleteTopic(widget.topic.id);
-                              widget.onDelete(widget.topic);
+                              _confirmDelete(context, viewModel, widget.topic,"Cửa ${widget.index + 1}: ${widget.topic.description}");
                             },
                             icon: const Icon(Icons.delete_forever),
-                           
                           ),
                           const SizedBox(width: 10),
                           IconButton(
@@ -166,13 +189,14 @@ class _StatisticsCardState extends State<StatisticsCard> {
 
                               if (updatedTopic != null) {
                                 widget.onEdit(updatedTopic);
+                               
                               }
                             },
                             icon: const Icon(Icons.edit),
-                           
                           ),
                         ],
-                      )
+                      ),),
+                     
                     ],
                   ),
                 ),
@@ -183,11 +207,62 @@ class _StatisticsCardState extends State<StatisticsCard> {
       ),
     );
   }
+
+  void _confirmDelete(BuildContext context, TopicViewModel viewModel, TopicModel topic,String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Xác nhận'),
+          content:  Text('Bạn có chắc chắn muốn xóa $content này không?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () {
+                viewModel.deleteTopic(topic.id);
+                widget.onDelete(topic);
+                Navigator.pop(context); // Close the confirmation dialog
+                _showSuccessDialog(context, 'Xóa $content thành công');
+              },
+              child: const Text('Xóa'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSuccessDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Thành công'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the success dialog
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
+
 
 class AddTopicScreen extends StatelessWidget {
   final TextEditingController _descriptionController = TextEditingController();
   final MapModel map;
+
   AddTopicScreen({super.key, required this.map});
 
   @override
@@ -210,7 +285,7 @@ class AddTopicScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 final topic = TopicModel(
-                  id: '',
+                  id: viewModel.newIdTopic(map.id),
                   description: _descriptionController.text,
                   lessons: [],
                   color: getRandomColor(),
@@ -219,6 +294,7 @@ class AddTopicScreen extends StatelessWidget {
                 viewModel.addTopic(map.id, topic);
                 List<dynamic> backData = [topic];
                 Navigator.pop(context, backData);
+                _showSuccessDialog(context, 'Thêm ${topic.description} thành công');
               },
               child: const Text('Thêm Topic'),
             ),
@@ -242,12 +318,50 @@ class AddTopicScreen extends StatelessWidget {
 
     return hexCode;
   }
+
+  void _showSuccessDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Thành công'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the success dialog
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
+
+
+  String getRandomColor() {
+    final List<String> colorHexCodes = [
+      '#57cc02', // xanh lá cây
+      '#cc3c3d', // đỏ
+      '#cc6ca7', // hồng
+      '#168dc5', // xanh
+      '#ffc605', //vàng
+    ];
+
+    final Random random = Random();
+    String hexCode = colorHexCodes[random.nextInt(colorHexCodes.length)];
+
+    return hexCode;
+  }
+
 
 class EditTopicScreen extends StatefulWidget {
   final TopicModel topic;
   final String map;
-  EditTopicScreen({super.key, required this.topic, required this.map});
+
+  const EditTopicScreen({super.key, required this.topic, required this.map});
 
   @override
   State<EditTopicScreen> createState() => _EditTopicScreenState();
@@ -292,6 +406,7 @@ class _EditTopicScreenState extends State<EditTopicScreen> {
 
                 viewModel.updateTopic(widget.map, updatedTopic);
                 Navigator.pop(context, updatedTopic);
+                _showSuccessDialog(context, 'Cập nhật ${widget.topic.description} thành công');
               },
               child: const Text('Lưu thay đổi'),
             ),
@@ -300,4 +415,25 @@ class _EditTopicScreenState extends State<EditTopicScreen> {
       ),
     );
   }
+
+  void _showSuccessDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Thành công'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the success dialog
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
+

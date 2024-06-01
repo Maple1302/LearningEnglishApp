@@ -94,18 +94,18 @@ class AuthViewModel with ChangeNotifier {
           _isLoading = false;
           notifyListeners();
         } else {
-           await Future.delayed(const Duration(seconds: 2));
+          await Future.delayed(const Duration(seconds: 2));
           _isLoggedIn = true;
           _isLoading = false;
           notifyListeners();
         }
       } else {
-         await Future.delayed(const Duration(seconds: 2));
+        await Future.delayed(const Duration(seconds: 2));
         _isLoggedIn = false;
         _isLoading = false;
         notifyListeners();
       }
-       await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
       _isLoading = false;
       notifyListeners();
     });
@@ -120,10 +120,12 @@ class AuthViewModel with ChangeNotifier {
       notifyListeners();
       User? user = await _authRepository.signInWithGoogle();
       if (user != null) {
-        await _authRepository.saveUserToFirestore(
-            user, user.displayName ?? 'user');
         _user = await _authRepository.getUserFromFirestore(user.uid);
-        _isLoggedIn = true;
+        if (_user?.role == 'user') {
+          await _authRepository.saveUserToFirestore(
+              user, user.displayName ?? 'user');
+          _isLoggedIn = true;
+        }
       }
       _isLoading = false;
     } on FirebaseAuthException catch (e) {
@@ -139,7 +141,7 @@ class AuthViewModel with ChangeNotifier {
           _isLoading = false;
           break;
         case 'email-not-verified':
-          errorMessage = "email chưa được xác thực";
+          errorMessage = "Email chưa được xác thực";
           _isLoading = false;
           break;
         default:
@@ -150,8 +152,49 @@ class AuthViewModel with ChangeNotifier {
       // Handle other errors such as network issues
       errorMessage = 'Error signing in with Google: $e';
       _isLoading = false;
+      _isLoggedIn = false;
+       await _authRepository.signOut();
     }
     notifyListeners();
+  }
+
+  bool isAdmin() {
+    return user?.role == 'admin';
+  }
+
+  bool isUser() {
+    return user?.role == 'user';
+  }
+
+  Future<void> updateUser(UserModel user) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _authRepository.updateUser(user);
+      errorMessage = null;
+    } catch (e) {
+      errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> completeLesson(String uid, String completedLesson) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      bool canComplete = await _authRepository.canCompleteLesson(uid);
+      if (canComplete) {
+        await _authRepository.completeLesson(uid, completedLesson);
+        errorMessage = null;
+      }
+    } catch (e) {
+      errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> signInWithEmail(String email, String password) async {

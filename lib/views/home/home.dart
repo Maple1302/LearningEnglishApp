@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:maple/viewmodels/auth_viewmodel.dart';
-import 'package:maple/views/admin/manager_lesson_view.dart';
+import 'package:maple/views/admin/user_profile.dart';
 import 'package:maple/views/admin/static_view.dart';
 import 'package:maple/views/auth/login_view.dart';
 import 'package:maple/views/maps/map_list_screen.dart';
@@ -20,11 +20,11 @@ class _HomeState extends State<Home> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-   
-    const HomePage(),
     const MapListScreen(),
+    const HomePage(),
+   
     const StatisticsScreen(),
-    const ManagerLessonScreen(),
+     const ProfileScreen(),
     
     
     // QuestionListScreen(lesson: LessonModel(id: '', description: 'description', question: QuestionModel(id: '', completeConversationQuestions: completeConversationQuestions, completeMissingSentenceQuestions: completeMissingSentenceQuestions, imageSelectionQuestions: imageSelectionQuestions, listeningQuestions: listeningQuestions, matchingPairQuestions: matchingPairQuestions, pronunciationQuestions: pronunciationQuestions, translationScreens: translationScreens)),),
@@ -77,21 +77,6 @@ class _HomeState extends State<Home> {
 
     return user != null
         ? Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.blueAccent,
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Image.asset(
-                    'images/flag_america.png',
-                    height: 35,
-                  ),
-                  itemAppBar('images/fire.png', user.streak),
-                  itemAppBar('images/gem.png', user.gem),
-                  itemAppBar('images/heart.png', user.heart)
-                ],
-              ),
-            ),
             bottomNavigationBar: BottomNavigationBar(
               items: bottomnavigationBarItems,
               currentIndex: _currentIndex,

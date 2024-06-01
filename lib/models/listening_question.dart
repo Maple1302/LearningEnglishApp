@@ -1,6 +1,7 @@
 // listening_question.g.dart
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:maple/utils/constants.dart';
 
 part 'listening_question.g.dart';
 
@@ -11,7 +12,7 @@ class ListeningQuestion {
   final List<String> items;
 
   ListeningQuestion({
-    required this.typeOfQuestion,
+     this.typeOfQuestion = listenQuestion,
     required this.correctAnswer,
     required this.items,
   });

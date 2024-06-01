@@ -1,6 +1,7 @@
 // image_selection_question.g.dart
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:maple/utils/constants.dart';
 
 part 'image_selection_question.g.dart';
 
@@ -12,7 +13,7 @@ class ImageSelectionQuestion {
   final List<Map<String,String>> items;
 
   ImageSelectionQuestion({
-    required this.typeOfQuestion,
+     this.typeOfQuestion = imageSelectionQuestions,
     required this.expectedWord,
     required this.correctAnswer,
     required this.items

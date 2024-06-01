@@ -1,14 +1,19 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_color/flutter_color.dart';
-import 'package:maple/models/topicmodel.dart';
+import 'package:maple/models/lessonmodel.dart';
+import 'package:maple/models/questionmodel.dart';
+import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:maple/views/questions/questions_screen.dart';
+import 'package:provider/provider.dart';
 
 class Lessons extends StatefulWidget {
-  final TopicModel topicModel;
+  final List<LessonModel> listLesson;
+  final bool enable;
   const Lessons({
     super.key,
-    required this.topicModel,
+    required this.listLesson,
+    required this.enable,
   });
 
   @override
@@ -21,19 +26,17 @@ class _LessonsState extends State<Lessons> {
   @override
   void initState() {
     super.initState();
-    listLesson = customListLesson(getListLesson(widget.topicModel));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-            leading: Container(),
-            backgroundColor: HexColor(widget.topicModel.color),
-            centerTitle: true,
-            title: Text(widget.topicModel.description,
-                style: const TextStyle(fontSize: 20, color: Colors.white))),
-        body: Column(children: listLesson));
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+
+    List<String> completedLesson =
+        authViewModel.user!.completedLessons.split(";");
+    listLesson =
+        customListLesson(getListLesson(widget.listLesson, completedLesson));
+    return Column(children: listLesson);
   }
 
   static Widget columnLesson(List<Widget> list) {
@@ -44,7 +47,8 @@ class _LessonsState extends State<Lessons> {
     );
   }
 
-  Widget lesson(String imageUrl, Color color, String title, String progress) {
+  Widget lesson(String imageUrl, Color color, String title, String progress,
+      QuestionModel questionModel, int length, bool enable) {
     return (imageUrl == '' || title == '')
         ? Container()
         : Column(
@@ -60,7 +64,7 @@ class _LessonsState extends State<Lessons> {
                         child: CircularProgressIndicator(
                           backgroundColor: Colors.grey,
                           valueColor: AlwaysStoppedAnimation(color),
-                          value: double.parse(progress) / 5,
+                          value: double.parse(progress) / length,
                           strokeWidth: 60,
                         ),
                       ),
@@ -73,14 +77,21 @@ class _LessonsState extends State<Lessons> {
                       ),
                       ElevatedButton(
                         style: ButtonStyle(
-                          padding: MaterialStateProperty.all(EdgeInsets.zero), // Xác định padding
+                          padding: MaterialStateProperty.all(
+                              EdgeInsets.zero), // Xác định padding
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         onPressed: () {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            Navigator.pushReplacementNamed(
-                                context, QuestionScreen.routeName);
-                          });
+                          if (enable) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => QuestionScreen(
+                                        questionModel: questionModel,
+                                      ) //TopicListScreen(mapModel: map),
+                                  ),
+                            );
+                          }
                         },
                         child: CircleAvatar(
                           backgroundColor: color,
@@ -123,15 +134,33 @@ class _LessonsState extends State<Lessons> {
           );
   }
 
-  List<Widget> getListLesson(TopicModel topic) {
+  List<Widget> getListLesson(
+      List<LessonModel> listLesson, List<String> lessonCompleted) {
     List<Widget> listLesson = [];
-    for (int i = 0; i < topic.lessons.length; i++) {
-      listLesson.add(lesson(
-        topic.lessons[i].images,
-        HexColor(topic.lessons[i].color),
-        topic.lessons[i].title,
-        4.toString(),
-      ));
+    int lessonC = int.parse(lessonCompleted[2]); //lesson
+    int questionC = int.parse(lessonCompleted[3]); //question
+    for (int i = 0; i < widget.listLesson.length; i++) {
+      if (widget.enable) {
+        listLesson.add(lesson(
+            widget.listLesson[i].images, //image
+            lessonC - 1 >= i
+                ? HexColor(widget.listLesson[i].color)
+                : Colors.grey, //color
+            widget.listLesson[i].title, //
+            lessonCompleted[3],
+            widget.listLesson[i].question[questionC - 1],
+            widget.listLesson[i].question.length,
+            i <= questionC - 1));
+      } else {
+        listLesson.add(lesson(
+            widget.listLesson[i].images, //image
+            Colors.grey, //color
+            widget.listLesson[i].title, //
+            lessonCompleted[3],
+            widget.listLesson[i].question[0],
+            widget.listLesson[i].question.length,
+            false));
+      }
     }
 
     return listLesson;

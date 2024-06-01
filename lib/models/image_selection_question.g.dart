@@ -9,7 +9,8 @@ part of 'image_selection_question.dart';
 ImageSelectionQuestion _$ImageSelectionQuestionFromJson(
         Map<String, dynamic> json) =>
     ImageSelectionQuestion(
-      typeOfQuestion: json['typeOfQuestion'] as String,
+      typeOfQuestion:
+          json['typeOfQuestion'] as String? ?? imageSelectionQuestions,
       expectedWord: json['expectedWord'] as String,
       correctAnswer: json['correctAnswer'] as String,
       items: (json['items'] as List<dynamic>)

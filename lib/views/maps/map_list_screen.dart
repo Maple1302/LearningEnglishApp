@@ -1,9 +1,12 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:maple/models/mapmodel.dart';
+import 'package:maple/models/user_model.dart';
+import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:maple/viewmodels/map_viewmodel.dart';
 import 'package:maple/views/admin/static_view.dart';
 import 'package:maple/views/topics/topic_list_screen.dart';
+import 'package:maple/views/topics/topic_list_screen_user.dart';
 import 'package:provider/provider.dart';
 
 class MapListScreen extends StatefulWidget {
@@ -17,21 +20,44 @@ class _MapListScreenState extends State<MapListScreen> {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<MapViewModel>(context, listen: false);
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
 
+    bool isAdmin = authViewModel.isAdmin();
+    UserModel? user = authViewModel.user;
+    String completedMap = authViewModel.user!.completedLessons.split(";")[0];
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("Khóa học Tiếng Anh"),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddMapScreen()),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
+      appBar: user != null
+          ? AppBar(
+              backgroundColor: Colors.blueAccent,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Image.asset(
+                    'images/flag_america.png',
+                    height: 35,
+                  ),
+                  itemAppBar('images/fire.png', user.streak),
+                  itemAppBar('images/gem.png', user.gem),
+                  itemAppBar('images/heart.png', user.heart)
+                ],
+              ),
+            )
+          : AppBar(
+              backgroundColor: Colors.blueAccent,
+              title: const Text("Khóa học tiếng Anh"),
+              centerTitle: true,
+            ),
+      floatingActionButton: isAdmin
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddMapScreen()),
+                );
+              },
+              child: const Icon(Icons.add),
+            )
+          : Container(),
       body: FutureBuilder<List<MapModel>>(
         future: viewModel.fetchMaps(),
         builder: (context, snapshot) {
@@ -55,12 +81,14 @@ class _MapListScreenState extends State<MapListScreen> {
                   final map = maps[index];
                   return StatisticsCard(
                     title: map.description,
-                    progress: const ProgressIndicatorCustom(
-                      progress: 70,
-                      size: 20,
-                      displayText: '%',
-                    ),
                     map: map,
+                    index: index,
+                    onEdit: (MapModel result) {
+                      setState(() {
+                        maps[index] = result;
+                      });
+                    },
+                    enable: index <= int.parse(completedMap) - 1 ,
                   );
                 },
               );
@@ -70,36 +98,71 @@ class _MapListScreenState extends State<MapListScreen> {
       ),
     );
   }
+
+  Widget itemAppBar(String image, String value) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Image.asset(image, height: 25),
+        Text(
+          value,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+          ),
+        )
+      ],
+    );
+  }
 }
 
 class StatisticsCard extends StatelessWidget {
   final String title;
   final MapModel map;
-  final Widget progress;
+  final int index;
+  final Function onEdit;
+  final bool enable;
 
   const StatisticsCard({
     super.key,
     required this.title,
     required this.map,
-    required this.progress,
+    required this.index,
+    required this.onEdit,
+    required this.enable,
   });
 
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<MapViewModel>(context, listen: false);
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+    bool isUser = authViewModel.isUser();
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TopicListScreen(mapModel: map),
-          ),
-        );
+      onTap: () async {
+        if (enable) {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => isUser
+                  ? TopicListScreenUser(
+                      topics: map.topics,
+                      description: "Phần ${index + 1}: $title",
+                    )
+                  : TopicListScreen(mapModel: map),
+            ),
+          );
+          if (result != null) {
+            onEdit(result);
+          }
+        }
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Card(
-          color: Colors.white,
+          color: enable ? Colors.white : Colors.grey,
           shadowColor: Colors.grey,
           elevation: 5,
           child: Padding(
@@ -115,7 +178,7 @@ class StatisticsCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16.0, vertical: 0.0),
                         child: Text(
-                          title,
+                          "Phần ${index + 1}: $title",
                           style: const TextStyle(
                             fontFamily: 'Roboto',
                             fontWeight: FontWeight.bold,
@@ -123,32 +186,49 @@ class StatisticsCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
-                        child: progress,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditMapScreen(map: map),
+                      Visibility(
+                        visible: isUser,
+                        child: enable
+                            ? const Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 16.0, vertical: 8.0),
+                                child: ProgressIndicatorCustom(
+                                  progress: 70,
+                                  size: 20,
+                                  displayText: '%',
                                 ),
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_forever),
-                            onPressed: () {
-                              viewModel.deleteMap(map.id);
-                            },
-                          ),
-                        ],
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0, vertical: 8.0),
+                                child: Text(
+                                    "Hoàn thành phần $index để mở khóa")),
+                      ),
+                      Visibility(
+                        visible: !isUser,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        EditMapScreen(map: map),
+                                  ),
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_forever),
+                              onPressed: () {
+                                _confirmDelete(context, viewModel, map);
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -160,8 +240,57 @@ class StatisticsCard extends StatelessWidget {
       ),
     );
   }
-}
 
+  void _confirmDelete(
+      BuildContext context, MapViewModel viewModel, MapModel map) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Xác nhận'),
+          content: Text(
+              'Bạn có chắc chắn muốn xóa "Phần ${index + 1}: $title" này không?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () {
+                viewModel.deleteMap(map.id);
+                Navigator.pop(context); // Close the confirmation dialog
+                _showDeleteSuccessDialog(context, "Phần ${index + 1}: $title");
+              },
+              child: const Text('Xóa'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteSuccessDialog(BuildContext context, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Thành công'),
+          content: Text('Xóa $content thành công'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the success dialog
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
 
 class EditMapScreen extends StatefulWidget {
   final MapModel map;
@@ -207,7 +336,25 @@ class _EditMapScreenState extends State<EditMapScreen> {
                 );
 
                 viewModel.updateMap(updatedMap);
-                Navigator.pop(context);
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Thành công'),
+                      content: Text(
+                          'Chỉnh sửa ${widget.map.description} thành công'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context); // Close the dialog
+                            Navigator.pop(context); // Close the EditMapScreen
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
               child: const Text('Lưu thay đổi'),
             ),
@@ -248,7 +395,24 @@ class AddMapScreen extends StatelessWidget {
                 );
 
                 viewModel.addMap(map);
-                Navigator.pop(context);
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Thành công'),
+                      content: Text('Thêm ${map.description} mới thành công'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context); // Close the dialog
+                            Navigator.pop(context); // Close the AddMapScreen
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
               child: const Text('Add Map'),
             ),
@@ -258,40 +422,20 @@ class AddMapScreen extends StatelessWidget {
     );
   }
 
-  String genId() {
-    // Lấy thời gian hiện tại
-    DateTime now = DateTime.now();
+  // Other methods remain the same...
+}
 
-    // Tạo một chuỗi ID từ các phần của thời gian hiện tại
-    String id = now.year.toString() +
-        now.month.toString().padLeft(2, '0') +
-        now.day.toString().padLeft(2, '0') +
-        now.hour.toString().padLeft(2, '0') +
-        now.minute.toString().padLeft(2, '0') +
-        now.second.toString().padLeft(2, '0') +
-        now.millisecond.toString().padLeft(3, '0') +
-        now.microsecond.toString().padLeft(3, '0');
+String getRandomColor() {
+  final List<String> colorHexCodes = [
+    '#57cc02', // xanh lá cây
+    '#cc3c3d', // đỏ
+    '#cc6ca7', // hồng
+    '#168dc5', // xanh
+    '#ffc605', //vàng
+  ];
 
-    // Thêm một số ngẫu nhiên để đảm bảo ID là duy nhất hơn
-    Random random = Random();
-    int randomNum = random.nextInt(100000); // Số ngẫu nhiên từ 0 đến 99999
-    id += randomNum.toString().padLeft(5, '0');
+  final Random random = Random();
+  String hexCode = colorHexCodes[random.nextInt(colorHexCodes.length)];
 
-    return id;
-  }
-
-  String getRandomColor() {
-    final List<String> colorHexCodes = [
-      '#57cc02', // xanh lá cây
-      '#cc3c3d', // đỏ
-      '#cc6ca7', // hồng
-      '#168dc5', // xanh
-      '#ffc605', //vàng
-    ];
-
-    final Random random = Random();
-    String hexCode = colorHexCodes[random.nextInt(colorHexCodes.length)];
-
-    return hexCode;
-  }
+  return hexCode;
 }

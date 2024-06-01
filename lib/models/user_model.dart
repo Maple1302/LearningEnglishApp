@@ -1,6 +1,13 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'user_model.g.dart';
+@JsonSerializable(explicitToJson: true)
 class UserModel {
   final String uid;
+  final String role;
   final String? email;
+  final String urlAvatar;
+  final String dateCreate;
   final String signInMethod;
   final String completedLessons;
   final String progress; 
@@ -9,10 +16,15 @@ class UserModel {
   final String language;
   final String heart;
   final String gem;
+  final String kN;
+  final String lastCompletionDate;
 
   UserModel({
     required this.uid,
     this.email,
+    required this.role,
+    required this.dateCreate,
+    required this.urlAvatar ,
     required this.signInMethod, 
     required this.completedLessons,
     required this.progress,
@@ -21,39 +33,12 @@ class UserModel {
     required this.language,
     required this.heart,
     required this.gem,
+    required this.kN,
+    required this.lastCompletionDate
   });
+factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
-  // Phương thức để chuyển đối tượng thành Map (JSON)
-  Map<String, dynamic> toMap() {
-    return {
-      'uid': uid,
-      'email': email,
-      'signInMethod':signInMethod,
-      'completedLessons': completedLessons,
-      'progress': progress,
-      'username': username,
-      'streak': streak,
-      'language': language,
-      'heart': heart,
-      'gem': gem,
-    };
-  }
-
-  // Phương thức để tạo đối tượng từ Map (JSON)
-  factory UserModel.fromMap(Map<String, dynamic> map) {
-    return UserModel(
-      uid: map['uid'],
-      email: map['email'],
-      signInMethod:map['signInMethod'],
-      completedLessons: map['completedLessons'],
-      progress: map['progress'],
-      username: map['username'],
-      streak: map['streak'],
-      language: map['language'],
-      heart: map['heart'],
-      gem: map['gem'],
-    );
-  }
+  Map<String, dynamic> toJson() => _$UserModelToJson(this);
 }
 
 

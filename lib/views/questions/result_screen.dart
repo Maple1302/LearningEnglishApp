@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_color/flutter_color.dart';
 import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
+import 'package:maple/models/user_model.dart';
+import 'package:maple/viewmodels/auth_viewmodel.dart';
+import 'package:maple/views/home/home.dart';
+import 'package:provider/provider.dart';
 
 class ResultScreen extends StatelessWidget {
   final int score, rateCompleted;
@@ -16,65 +20,82 @@ class ResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
+    UserModel? user = authViewModel.user;
+    if (user != null) {
+      authViewModel.completeLesson(user.uid,routeName);
+    }
+
     AudioHelper.playSound("success");
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Animated image section
-              const Spacer(),
-              Image.asset('images/faster_icon.png', height: 150),
-              const SizedBox(height: 20),
-              // Text Section
-              const Text(
-                'Siêu nhanh!',
-                style: TextStyle(
-                  fontSize: 35,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+    return authViewModel.isLoading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : Scaffold(
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Animated image section
+                    const Spacer(),
+                    Image.asset('images/faster_icon.png', height: 150),
+                    const SizedBox(height: 20),
+                    // Text Section
+                    const Text(
+                      'Siêu nhanh!',
+                      style: TextStyle(
+                        fontSize: 35,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Bạn hoàn thành trong chưa tới 2 phút!',
+                      style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    // Stats section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        buildStatCard('TỔNG ĐIỂM', '$score',
+                            HexColor("#ffc800"), 'images/score_icon.png', true),
+                        const SizedBox(width: 10),
+                        buildStatCard('TỐC ĐỘ', finalTime, Colors.blue,
+                            'images/clock_icon.png', false),
+                        const SizedBox(width: 10),
+                        buildStatCard('TUYỆT VỜI', '$rateCompleted%',
+                            Colors.green, 'images/target_icon.png', false),
+                      ],
+                    ),
+                    const Spacer(),
+                    // Continue button
+                    ButtonCheck(
+                      onPressed: () {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const Home()), // Replace with your new screen
+                            (Route<dynamic> route) =>
+                                false, // This condition removes all routes
+                          );
+                        });
+                      },
+                      text: 'Tiếp tục',
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 10),
-              const Text(
-                'Bạn hoàn thành trong chưa tới 2 phút!',
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              // Stats section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  buildStatCard('TỔNG ĐIỂM', '$score', HexColor("#ffc800"),
-                      'images/score_icon.png', true),
-                  const SizedBox(width: 10),
-                  buildStatCard('TỐC ĐỘ', finalTime, Colors.blue,
-                      'images/clock_icon.png', false),
-                  const SizedBox(width: 10),
-                  buildStatCard('TUYỆT VỜI', '$rateCompleted%', Colors.green,
-                      'images/target_icon.png', false),
-                ],
-              ),
-              const Spacer(),
-              // Continue button
-              ButtonCheck(
-                onPressed: () {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    Navigator.pushReplacementNamed(context, '/');
-                  });
-                },
-                text: 'Tiếp tục',
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          );
   }
 
   Widget buildStatCard(String title, String value, Color color,

@@ -8,7 +8,7 @@ part of 'listening_question.dart';
 
 ListeningQuestion _$ListeningQuestionFromJson(Map<String, dynamic> json) =>
     ListeningQuestion(
-      typeOfQuestion: json['typeOfQuestion'] as String,
+      typeOfQuestion: json['typeOfQuestion'] as String? ?? listenQuestion,
       correctAnswer: json['correctAnswer'] as String,
       items: (json['items'] as List<dynamic>).map((e) => e as String).toList(),
     );

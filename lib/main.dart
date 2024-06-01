@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:maple/firebase_options.dart';
-import 'package:maple/models/lessonmodel.dart';
+import 'package:maple/models/questionmodel.dart';
 import 'package:maple/viewmodels/lesson_viewmodel.dart';
 import 'package:maple/viewmodels/map_viewmodel.dart';
 import 'package:maple/viewmodels/question_viewmodel.dart';
@@ -31,6 +31,7 @@ Future<void> main() async {
 }
 
 class MyHome extends StatelessWidget {
+
   const MyHome({super.key});
 
   @override
@@ -67,7 +68,7 @@ class MyHome extends StatelessWidget {
           ResultScreen.routeName: (context) =>
               const ResultScreen(score: 0, rateCompleted: 0, finalTime: ''),
           ResetPasswordView.routeName: (context) => const ResetPasswordView(),
-          QuestionScreen.routeName: (context) =>  QuestionScreen(lesson:LessonModel(id: '', title: '', description: '', question: [], images: '', color: ''),)
+          QuestionScreen.routeName: (context) =>  QuestionScreen(questionModel:QuestionModel(answersCardQuestions: [], id: '', completeConversationQuestions: [], completeMissingSentenceQuestions: [], imageSelectionQuestions: [], listeningQuestions: [], matchingPairQuestions: [], pronunciationQuestions: [], translationQuestions: [],))
         },
       ),
     );

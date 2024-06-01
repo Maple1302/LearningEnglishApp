@@ -9,7 +9,8 @@ part of 'complete_missing_sentence_question.dart';
 CompleteMissingSentenceQuestion _$CompleteMissingSentenceQuestionFromJson(
         Map<String, dynamic> json) =>
     CompleteMissingSentenceQuestion(
-      typeOfQuestion: json['typeOfQuestion'] as String,
+      typeOfQuestion:
+          json['typeOfQuestion'] as String? ?? completeMissingSentenceQuestion,
       expectedSentence: json['expectedSentence'] as String,
       missingSentence: json['missingSentence'] as String,
       correctanswers: json['correctanswers'] as String,

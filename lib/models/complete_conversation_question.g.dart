@@ -9,7 +9,8 @@ part of 'complete_conversation_question.dart';
 CompleteConversationQuestion _$CompleteConversationQuestionFromJson(
         Map<String, dynamic> json) =>
     CompleteConversationQuestion(
-      typeOfQuestion: json['typeOfQuestion'] as String,
+      typeOfQuestion:
+          json['typeOfQuestion'] as String? ?? completeConversationQuestion,
       question: Map<String, String>.from(json['question'] as Map),
       correctAnswer: Map<String, String>.from(json['correctAnswer'] as Map),
       items: (json['items'] as List<dynamic>).map((e) => e as String).toList(),

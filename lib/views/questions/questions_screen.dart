@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
-import 'package:maple/models/lessonmodel.dart';
 import 'package:maple/models/questionmodel.dart';
 import 'package:maple/utils/constants.dart';
+import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:maple/views/questions/answers_card.dart';
 import 'package:maple/views/questions/background_decoration.dart';
 import 'package:maple/views/questions/complete_conversation_screen.dart';
@@ -16,132 +17,110 @@ import 'package:maple/views/questions/pronunciation_screen.dart';
 import 'package:maple/views/questions/result_screen.dart';
 import 'package:maple/views/questions/select_card_screen.dart';
 import 'package:maple/views/questions/transerlation_screen.dart';
+import 'package:provider/provider.dart';
 
 class QuestionScreen extends StatefulWidget {
   static const String routeName = "/questionScreen";
-  final LessonModel lesson;
-  const QuestionScreen({super.key, required this.lesson});
+  final QuestionModel questionModel;
+  const QuestionScreen({super.key, required this.questionModel});
 
   @override
   State<QuestionScreen> createState() => _QuestionScreenState();
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
-  List<QuestionModel> questions1 = [];
+  
+   List<Map<String, Object>> questions  = [];
 
-  List<Map<String, Object>> questions11 = [];
-
-  final List<Map<String, Object>> questions = [
-    {
+  List<Map<String, Object>> convertQuestions(QuestionModel questionModel) {
+  List<Map<String, Object>> questions = [];
+ 
+  for (var question in questionModel.matchingPairQuestions) {
+    questions.add({
       'type': matchingPairWordQuestion,
-      'items': [
-        {'mean': 'em bé', 'text': 'baby'},
-        {'text': 'em bé', 'mean': 'baby'},
-        {'mean': 'kem', 'text': 'ice cream'},
-        {'text': 'màu vàng', 'mean': 'yellow'},
-        {'mean': 'sô-cô-la', 'text': 'socola'},
-        {'text': 'sô-cô-la', 'mean': 'socola'},
-        {'mean': 'màu vàng', 'text': 'yellow'},
-        {'text': 'kem', 'mean': 'ice cream'},
-      ],
-    },
-    {
-      'type': pronunciationQuestion,
-      'sampleText': "Hello, What's your name?",
-      'mean': 'Xin chào, Bạn tên gì?',
-    },
+      'items': question.items.map((item) => {
+        'mean': item['mean'] ?? '',
+        'text': item['text'] ?? ''
+      }).toList(),
+    });
+  }
 
-    {
+  for (var question in questionModel.pronunciationQuestions) {
+    questions.add({
+      'type': pronunciationQuestion,
+      'sampleText': question.sampleText ,
+      'mean': question.mean ,
+    });
+  }
+
+  for (var question in questionModel.completeConversationQuestions) {
+    questions.add({
       'type': completeConversationQuestion,
       'question': {
-        'text': 'what can i do?',
-        'mean': 'Đây là bạn trai của con có phải không Lisa?'
+        'text': question.question['text'] ?? '',
+        'mean': question.question['mean'] ?? '',
       },
       'correctAnswer': {
-        'text': 'Yes, He is Tommy',
-        'mean': 'Vâng, Anh ấy là Tommy'
+        'text': question.correctAnswer['text'] ?? '',
+        'mean': question.correctAnswer['mean'] ?? '',
       },
-      'items': [
-        'Yes, He is Tommy',
-        'Yes, that\'s my younger brother.',
-      ],
-    },
-    {
+      'items': question.items.map((item) => item ).toList(),
+    });
+  }
+
+  for (var question in questionModel.translationQuestions) {
+    questions.add({
       'type': transerlationListenQueston,
-      'answers': [
-        'Hello',
-        "What's",
-        'your',
-        'have',
-        'am',
-        'name?',
-      ],
-      'question': "Hello, What's your name?",
-      'mean': "Xin chào, tên bạn là gì?",
-    },
+      'answers': question.answers.map((answer) => answer ).toList(),
+      'question': question.question ,
+      'mean': question.mean ,
+    });
+  }
 
-    {
-      'type': transerlationReadQueston,
-      'answers': [
-        'Hello',
-        "What's",
-        'your',
-        'have',
-        'am',
-        'name?',
-      ],
-      'question': "Hello, What's your name?",
-      'mean': "Xin chào, tên bạn là gì?",
-    },
-
-    {
-      'type': matchingPairSoundQuestion,
-      'items': [
-        {'mean': 'em bé', 'text': 'baby'},
-        {'text': 'em bé', 'mean': 'baby'},
-        {'mean': 'kem', 'text': 'ice cream'},
-        {'text': 'màu vàng', 'mean': 'yellow'},
-        {'mean': 'sô-cô-la', 'text': 'socola'},
-        {'text': 'sô-cô-la', 'mean': 'socola'},
-        {'mean': 'màu vàng', 'text': 'yellow'},
-        {'text': 'kem', 'mean': 'ice cream'},
-      ],
-    },
-    {
-      'type': listenQuestion,
-      'items': ['Flow', 'Flew'],
-      'correctAnswer': 'Flow',
-    },
-    {
+  for (var question in questionModel.imageSelectionQuestions) {
+    questions.add({
       'type': imageSelectionQuestions,
-      'expectedWord': 'ice cream',
-      'correctAnswer': 'kem',
-      'items': [
-        {'image': 'images/restaurant.png', 'text': 'kem', 'mean': 'ice cream'},
-        {'image': 'images/crown.png', 'text': 'em bé', 'mean': 'baby'},
-        {
-          'image': 'images/easter-egg_colorful.png',
-          'text': 'màu vàng',
-          'mean': 'yellow'
-        },
-        {'image': 'images/gem.png', 'text': 'sô-cô-la', 'mean': 'socola'},
-      ],
-    },
+      'expectedWord': question.expectedWord ,
+      'correctAnswer': question.correctAnswer ,
+      'items': question.items.map((item) {
+        return {
+          'image': item['image'] ?? '',
+          'text': item['text'] ?? '',
+          'mean': item['mean'] ?? '',
+        };
+      }).toList(),
+    });
+  }
 
-    {
+  for (var question in questionModel.completeMissingSentenceQuestions) {
+    questions.add({
       'type': completeMissingSentenceQuestion,
-      'expectedSentence': 'Vâng, tôi muốn hai chiếc Pizza',
-      'missingSentence': 'Yes,I would like to ',
-      'correctanswers': 'pizzas',
-    },
-    {
+      'expectedSentence': question.expectedSentence ,
+      'missingSentence': question.missingSentence ,
+      'correctanswers': question.correctanswers ,
+    });
+  }
+
+  for (var question in questionModel.answersCardQuestions) {
+    questions.add({
       'type': cardMutilChoiceQuestion,
-      'question': "Hi Peter",
-      'correctAnswer': "hello",
-      'answers': ["hi", "hello", "good", "too much"]
-    },
-    // Thêm các câu hỏi khác tương tự
-  ];
+      'question': question.question ,
+      'correctAnswer': question.correctAnswer ,
+      'answers': question.answers.map((answer) => answer ).toList(),
+    });
+  }
+
+  for (var question in questionModel.listeningQuestions) {
+    questions.add({
+      'type': listenQuestion,
+      'items': question.items.map((item) => item ).toList(),
+      'correctAnswer': question.correctAnswer ,
+    });
+  }
+
+  return questions;
+}
+
   int currentQuestionIndex = 0;
   int countIcorrectQuestion = 0;
   int score = 0;
@@ -151,16 +130,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
   @override
   void initState() {
     super.initState();
-    questions1 = widget.lesson.question;
-    for (int i = 0; i < questions1.length; i++) {
-      
-    }
+    questions = convertQuestions(widget.questionModel);
+    questions.shuffle(Random());
     startTimer();
   }
 
   void startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      _elapsedTime++;
+    _elapsedTime++;
     });
   }
 
@@ -268,9 +245,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     ],
                   ),
                 );
-              });
+              },);
         }
-      });
+      },);
     } else {
       setState(() {
         consecutiveCorrect = 0; // Reset chuỗi đúng liên tục nếu trả lời sai
@@ -280,7 +257,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       if (currentQuestionIndex < questions.length - 1) {
         currentQuestionIndex++;
       } else {
-        // Hết câu hỏi, chuyển tới màn hình kết quả
+        
         stopTimer();
         Navigator.pushReplacement(
           context,
@@ -299,7 +276,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
     final question = questions[currentQuestionIndex];
+  
     Widget questionWidget = Container();
     switch (question['type']) {
       case completeConversationQuestion:
