@@ -20,44 +20,48 @@ class _MapListScreenState extends State<MapListScreen> {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<MapViewModel>(context, listen: false);
-    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
 
-    bool isAdmin = authViewModel.isAdmin();
-    UserModel? user = authViewModel.user;
-    String completedMap = authViewModel.user!.completedLessons.split(";")[0];
     return Scaffold(
-      appBar: user != null
-          ? AppBar(
-              backgroundColor: Colors.blueAccent,
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Image.asset(
-                    'images/flag_america.png',
-                    height: 35,
-                  ),
-                  itemAppBar('images/fire.png', user.streak),
-                  itemAppBar('images/gem.png', user.gem),
-                  itemAppBar('images/heart.png', user.heart)
-                ],
-              ),
-            )
-          : AppBar(
-              backgroundColor: Colors.blueAccent,
-              title: const Text("Khóa học tiếng Anh"),
-              centerTitle: true,
-            ),
-      floatingActionButton: isAdmin
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddMapScreen()),
-                );
-              },
-              child: const Icon(Icons.add),
-            )
-          : Container(),
+      appBar: AppBar(
+        backgroundColor: Colors.blueAccent,
+        title: Consumer<AuthViewModel>(
+          builder: (context, authViewModel, child) {
+            bool isAdmin = authViewModel.isAdmin();
+            UserModel? user = authViewModel.user;
+            return user != null && !isAdmin
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Image.asset(
+                        'images/flag_america.png',
+                        height: 35,
+                      ),
+                      itemAppBar('images/fire.png', user.streak),
+                      itemAppBar('images/gem.png', user.gem),
+                      itemAppBar('images/heart.png', user.heart)
+                    ],
+                  )
+                : const Text("Khóa học tiếng Anh");
+          },
+        ),
+        centerTitle: true,
+      ),
+      floatingActionButton: Consumer<AuthViewModel>(
+        builder: (context, authViewModel, child) {
+          bool isAdmin = authViewModel.isAdmin();
+          return isAdmin
+              ? FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AddMapScreen()),
+                    );
+                  },
+                  child: const Icon(Icons.add),
+                )
+              : Container();
+        },
+      ),
       body: FutureBuilder<List<MapModel>>(
         future: viewModel.fetchMaps(),
         builder: (context, snapshot) {
@@ -72,23 +76,47 @@ class _MapListScreenState extends State<MapListScreen> {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No maps available'));
           }
-          return Consumer<MapViewModel>(
-            builder: (context, viewModel, child) {
-              final maps = viewModel.maps;
-              return ListView.builder(
-                itemCount: maps.length,
-                itemBuilder: (context, index) {
-                  final map = maps[index];
-                  return StatisticsCard(
-                    title: map.description,
-                    map: map,
-                    index: index,
-                    onEdit: (MapModel result) {
-                      setState(() {
-                        maps[index] = result;
-                      });
+
+          return Consumer<AuthViewModel>(
+            builder: (context, authViewModel, child) {
+              String completedMap =
+                  authViewModel.user?.completedLessons.split(";")[0] ?? "0";
+              return Consumer<MapViewModel>(
+                builder: (context, viewModel, child) {
+                  final maps = viewModel.maps;
+                  return ListView.builder(
+                    itemCount: maps.length,
+                    itemBuilder: (context, index) {
+                      final map = maps[index];
+                      bool isMapUnlocked = index < int.parse(completedMap);
+                      bool isCurrentMap = index == int.parse(completedMap);
+                      double progressOfMap = 0;
+
+                      if (isMapUnlocked) {
+                        progressOfMap = 100;
+                      }
+                      if (isCurrentMap) {
+                        progressOfMap = int.parse(authViewModel
+                                .user!.completedLessons
+                                .split(";")[1]) /
+                            map.topics.length *
+                            100;
+                      }
+
+                      return StatisticsCard(
+                        title: map.description,
+                        map: map,
+                        index: index,
+                        onEdit: (MapModel result) {
+                          setState(() {
+                            maps[index] = result;
+                          });
+                        },
+                        isMapUnlocked: isMapUnlocked,
+                        isCurrentMap: isCurrentMap,
+                        progress: progressOfMap,
+                      );
                     },
-                    enable: index <= int.parse(completedMap) - 1 ,
                   );
                 },
               );
@@ -124,7 +152,9 @@ class StatisticsCard extends StatelessWidget {
   final MapModel map;
   final int index;
   final Function onEdit;
-  final bool enable;
+  final bool isMapUnlocked;
+  final bool isCurrentMap;
+  final double progress;
 
   const StatisticsCard({
     super.key,
@@ -132,7 +162,9 @@ class StatisticsCard extends StatelessWidget {
     required this.map,
     required this.index,
     required this.onEdit,
-    required this.enable,
+    required this.isMapUnlocked,
+    required this.progress,
+    required this.isCurrentMap,
   });
 
   @override
@@ -142,14 +174,16 @@ class StatisticsCard extends StatelessWidget {
     bool isUser = authViewModel.isUser();
     return GestureDetector(
       onTap: () async {
-        if (enable) {
+        if (isMapUnlocked || isCurrentMap) {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => isUser
                   ? TopicListScreenUser(
+                      mapId: index,
                       topics: map.topics,
                       description: "Phần ${index + 1}: $title",
+                      isMapUnlocked:isMapUnlocked ,isCurrentMap:isCurrentMap
                     )
                   : TopicListScreen(mapModel: map),
             ),
@@ -162,7 +196,7 @@ class StatisticsCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Card(
-          color: enable ? Colors.white : Colors.grey,
+          color: isMapUnlocked || isCurrentMap ? Colors.white : Colors.grey,
           shadowColor: Colors.grey,
           elevation: 5,
           child: Padding(
@@ -188,12 +222,12 @@ class StatisticsCard extends StatelessWidget {
                       ),
                       Visibility(
                         visible: isUser,
-                        child: enable
-                            ? const Padding(
-                                padding: EdgeInsets.symmetric(
+                        child: isMapUnlocked || isCurrentMap
+                            ? Padding(
+                                padding: const EdgeInsets.symmetric(
                                     horizontal: 16.0, vertical: 8.0),
                                 child: ProgressIndicatorCustom(
-                                  progress: 70,
+                                  progress: progress,
                                   size: 20,
                                   displayText: '%',
                                 ),
@@ -201,8 +235,8 @@ class StatisticsCard extends StatelessWidget {
                             : Padding(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 16.0, vertical: 8.0),
-                                child: Text(
-                                    "Hoàn thành phần $index để mở khóa")),
+                                child:
+                                    Text("Hoàn thành phần $index để mở khóa")),
                       ),
                       Visibility(
                         visible: !isUser,

@@ -153,7 +153,7 @@ class AuthViewModel with ChangeNotifier {
       errorMessage = 'Error signing in with Google: $e';
       _isLoading = false;
       _isLoggedIn = false;
-       await _authRepository.signOut();
+      await _authRepository.signOut();
     }
     notifyListeners();
   }
@@ -166,29 +166,13 @@ class AuthViewModel with ChangeNotifier {
     return user?.role == 'user';
   }
 
-  Future<void> updateUser(UserModel user) async {
+  Future<void> updateUser(UserModel newUser) async {
     _isLoading = true;
     notifyListeners();
     try {
-      await _authRepository.updateUser(user);
+      await _authRepository.updateUser(newUser);
+      _user = newUser;
       errorMessage = null;
-    } catch (e) {
-      errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> completeLesson(String uid, String completedLesson) async {
-    _isLoading = true;
-    notifyListeners();
-    try {
-      bool canComplete = await _authRepository.canCompleteLesson(uid);
-      if (canComplete) {
-        await _authRepository.completeLesson(uid, completedLesson);
-        errorMessage = null;
-      }
     } catch (e) {
       errorMessage = e.toString();
     } finally {
@@ -283,6 +267,32 @@ class AuthViewModel with ChangeNotifier {
       _isLoading = false;
     }
     notifyListeners();
+  }
+
+  Future<void> changePasswordEmail(
+      String currentPassword, String newPassword) async {
+    _isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _authRepository.changePassword(currentPassword, newPassword);
+    } on FirebaseAuthException catch (e) {
+      // Handle Firebase-specific errors
+      switch (e.code) {
+        case 'wrong-password':
+          errorMessage = " Mật khẩu sai vui lòng kiểm tra lại";
+          _isLoading = false;
+          break;
+        default:
+          errorMessage = " Lỗi không xác định";
+          _isLoading = false;
+          break;
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> resetPassword(String email) async {

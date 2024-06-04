@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
@@ -9,7 +8,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 class PronunciationScreen extends StatefulWidget {
   final String sampleText;
   final String mean;
-  final Function(bool,int) onAnswer;
+  final Function(bool, int) onAnswer;
   const PronunciationScreen(
       {super.key,
       required this.sampleText,
@@ -25,7 +24,7 @@ class _PronunciationScreenState extends State<PronunciationScreen> {
   bool _isListening = false;
   String _userText = "";
   bool standards = false;
-  int score =3;
+  int score = 3;
 
   @override
   void initState() {
@@ -48,7 +47,7 @@ class _PronunciationScreenState extends State<PronunciationScreen> {
     _userText = "";
     standards = false;
     AudioHelper.speak(widget.sampleText);
-    score =3;
+    score = 3;
   }
 
   @override
@@ -123,7 +122,7 @@ class _PronunciationScreenState extends State<PronunciationScreen> {
           const Spacer(),
           TextButton(
             onPressed: () {
-              widget.onAnswer(false,score);
+              widget.onAnswer(false, score);
             },
             child: const Text(
               'GIỜ CHƯA NÓI ĐƯỢC',
@@ -173,33 +172,43 @@ class _PronunciationScreenState extends State<PronunciationScreen> {
     bool available = await _speech.initialize(
       onStatus: (status) {
         if (status == 'notListening') {
-          setState(() {
-            _isListening = false;
-          });
+          if (mounted) {
+            setState(() {
+              _isListening = false;
+            });
+          }
         }
       },
       onError: (error) {
-        _showResultDialog('Bạn chưa phát âm phải không?', false);
-        AudioHelper.playSound('error');
+        if (mounted) {
+          _showResultDialog('Bạn chưa phát âm phải không?', false);
+          AudioHelper.playSound('error');
+        }
       },
     );
 
     if (available) {
-      setState(() {
-        _isListening = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isListening = true;
+        });
+      }
 
       _speech.listen(
         listenFor: const Duration(seconds: 15),
         onResult: (result) {
-          setState(() {
-            _userText = result.recognizedWords.trim();
-          });
+          if (mounted) {
+            setState(() {
+              _userText = result.recognizedWords.trim();
+            });
+          }
         },
       );
     } else {
-      _showResultDialog('Vui lòng cho phép ghi âm', false);
-      AudioHelper.playSound('fail');
+      if (mounted) {
+        _showResultDialog('Vui lòng cho phép ghi âm', false);
+        AudioHelper.playSound('fail');
+      }
     }
   }
 
@@ -218,7 +227,7 @@ class _PronunciationScreenState extends State<PronunciationScreen> {
   }
 
   void _showResultDialog(String message, bool check) {
-   
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.white,
         duration:
@@ -260,7 +269,7 @@ class _PronunciationScreenState extends State<PronunciationScreen> {
                   ? ButtonCheck(
                       type: check ? typeButtonCheck : typeButtonCheckDialog,
                       onPressed: () {
-                        widget.onAnswer(check,score);
+                        widget.onAnswer(check, score);
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       },
                       text: 'Tiếp tục',
@@ -270,12 +279,14 @@ class _PronunciationScreenState extends State<PronunciationScreen> {
           ),
         ),
       ));
+    }
   }
 
   @override
   void dispose() {
-    super.dispose();
+    _speech.stop();
     AudioHelper.disposeAudio();
     AudioHelper.disposeTts();
+    super.dispose();
   }
 }

@@ -97,31 +97,35 @@ class AuthRepository {
     return user?.emailVerified ?? false;
   }
 
-  Future<bool> canCompleteLesson(String uid) async {
+ 
+Future<void> changePassword(String currentPassword, String newPassword) async {
+    final user = _firebaseAuth.currentUser;
+
+    if (user == null) {
+      throw FirebaseAuthException(
+        code: 'user-not-signed-in',
+        message: 'No user is currently signed in.',
+      );
+    }
+
+    final credential = EmailAuthProvider.credential(
+      email: user.email!,
+      password: currentPassword,
+    );
+
     try {
-      DocumentSnapshot doc =
-          await _firestore.collection('Users').doc(uid).get();
-      if (doc.exists) {
-        UserModel user = UserModel.fromJson(doc.data() as Map<String, dynamic>);
-        String today = DateTime.now().toIso8601String().substring(0, 10);
-        if (user.lastCompletionDate == today) {
-          return false;
-        }
-        return true;
-      }
-      return false;
-    } catch (e) {
-      throw Exception('Error checking completion status: $e');
+      // Reauthenticate the user
+      await user.reauthenticateWithCredential(credential);
+      // Update the password
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw FirebaseAuthException(
+        code: e.code,
+        message: e.message,
+      );
     }
   }
-
-  Future<void> completeLesson(String uid,String completedLesson) async {
-    await _firestore.collection('Users').doc(uid).update({
-      'lastCompletionDate': DateTime.now().toIso8601String().substring(0, 10),
-      'completedLessons': FieldValue.increment(1),
-      'streak': FieldValue.increment(1)
-    });
-  }
+  
 
   Future<UserModel?> getUserFromFirestore(String uid) async {
     DocumentSnapshot doc = await _firestore.collection('Users').doc(uid).get();

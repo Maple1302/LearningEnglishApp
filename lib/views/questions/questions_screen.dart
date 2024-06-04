@@ -6,7 +6,7 @@ import 'package:maple/UI/custom_buttons.dart';
 import 'package:maple/helper/audio_helper.dart';
 import 'package:maple/models/questionmodel.dart';
 import 'package:maple/utils/constants.dart';
-import 'package:maple/viewmodels/auth_viewmodel.dart';
+import 'package:maple/views/home/home.dart';
 import 'package:maple/views/questions/answers_card.dart';
 import 'package:maple/views/questions/background_decoration.dart';
 import 'package:maple/views/questions/complete_conversation_screen.dart';
@@ -17,109 +17,112 @@ import 'package:maple/views/questions/pronunciation_screen.dart';
 import 'package:maple/views/questions/result_screen.dart';
 import 'package:maple/views/questions/select_card_screen.dart';
 import 'package:maple/views/questions/transerlation_screen.dart';
-import 'package:provider/provider.dart';
 
 class QuestionScreen extends StatefulWidget {
   static const String routeName = "/questionScreen";
   final QuestionModel questionModel;
-  const QuestionScreen({super.key, required this.questionModel});
+  final List<String> lessonState;
+  const QuestionScreen(
+      {super.key,
+      required this.questionModel,
+      required this.lessonState,
+      });
 
   @override
   State<QuestionScreen> createState() => _QuestionScreenState();
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
-  
-   List<Map<String, Object>> questions  = [];
+  List<Map<String, Object>> questions = [];
 
   List<Map<String, Object>> convertQuestions(QuestionModel questionModel) {
-  List<Map<String, Object>> questions = [];
- 
-  for (var question in questionModel.matchingPairQuestions) {
-    questions.add({
-      'type': matchingPairWordQuestion,
-      'items': question.items.map((item) => {
-        'mean': item['mean'] ?? '',
-        'text': item['text'] ?? ''
-      }).toList(),
-    });
-  }
+    List<Map<String, Object>> questions = [];
 
-  for (var question in questionModel.pronunciationQuestions) {
-    questions.add({
-      'type': pronunciationQuestion,
-      'sampleText': question.sampleText ,
-      'mean': question.mean ,
-    });
-  }
+    for (var question in questionModel.matchingPairQuestions) {
+      questions.add({
+        'type': matchingPairWordQuestion,
+        'items': question.items
+            .map((item) =>
+                {'mean': item['mean'] ?? '', 'text': item['text'] ?? ''})
+            .toList(),
+      });
+    }
 
-  for (var question in questionModel.completeConversationQuestions) {
-    questions.add({
-      'type': completeConversationQuestion,
-      'question': {
-        'text': question.question['text'] ?? '',
-        'mean': question.question['mean'] ?? '',
-      },
-      'correctAnswer': {
-        'text': question.correctAnswer['text'] ?? '',
-        'mean': question.correctAnswer['mean'] ?? '',
-      },
-      'items': question.items.map((item) => item ).toList(),
-    });
-  }
+    for (var question in questionModel.pronunciationQuestions) {
+      questions.add({
+        'type': pronunciationQuestion,
+        'sampleText': question.sampleText,
+        'mean': question.mean,
+      });
+    }
 
-  for (var question in questionModel.translationQuestions) {
-    questions.add({
-      'type': transerlationListenQueston,
-      'answers': question.answers.map((answer) => answer ).toList(),
-      'question': question.question ,
-      'mean': question.mean ,
-    });
-  }
+    for (var question in questionModel.completeConversationQuestions) {
+      questions.add({
+        'type': completeConversationQuestion,
+        'question': {
+          'text': question.question['text'] ?? '',
+          'mean': question.question['mean'] ?? '',
+        },
+        'correctAnswer': {
+          'text': question.correctAnswer['text'] ?? '',
+          'mean': question.correctAnswer['mean'] ?? '',
+        },
+        'items': question.items.map((item) => item).toList(),
+      });
+    }
 
-  for (var question in questionModel.imageSelectionQuestions) {
-    questions.add({
-      'type': imageSelectionQuestions,
-      'expectedWord': question.expectedWord ,
-      'correctAnswer': question.correctAnswer ,
-      'items': question.items.map((item) {
-        return {
-          'image': item['image'] ?? '',
-          'text': item['text'] ?? '',
-          'mean': item['mean'] ?? '',
-        };
-      }).toList(),
-    });
-  }
+    for (var question in questionModel.translationQuestions) {
+      questions.add({
+        'type': transerlationListenQueston,
+        'answers': question.answers.map((answer) => answer).toList(),
+        'question': question.question,
+        'mean': question.mean,
+      });
+    }
 
-  for (var question in questionModel.completeMissingSentenceQuestions) {
-    questions.add({
-      'type': completeMissingSentenceQuestion,
-      'expectedSentence': question.expectedSentence ,
-      'missingSentence': question.missingSentence ,
-      'correctanswers': question.correctanswers ,
-    });
-  }
+    for (var question in questionModel.imageSelectionQuestions) {
+      questions.add({
+        'type': imageSelectionQuestions,
+        'expectedWord': question.expectedWord,
+        'correctAnswer': question.correctAnswer,
+        'items': question.items.map((item) {
+          return {
+            'image': item['image'] ?? '',
+            'text': item['text'] ?? '',
+            'mean': item['mean'] ?? '',
+          };
+        }).toList(),
+      });
+    }
 
-  for (var question in questionModel.answersCardQuestions) {
-    questions.add({
-      'type': cardMutilChoiceQuestion,
-      'question': question.question ,
-      'correctAnswer': question.correctAnswer ,
-      'answers': question.answers.map((answer) => answer ).toList(),
-    });
-  }
+    for (var question in questionModel.completeMissingSentenceQuestions) {
+      questions.add({
+        'type': completeMissingSentenceQuestion,
+        'expectedSentence': question.expectedSentence,
+        'missingSentence': question.missingSentence,
+        'correctanswers': question.correctanswers,
+      });
+    }
 
-  for (var question in questionModel.listeningQuestions) {
-    questions.add({
-      'type': listenQuestion,
-      'items': question.items.map((item) => item ).toList(),
-      'correctAnswer': question.correctAnswer ,
-    });
-  }
+    for (var question in questionModel.answersCardQuestions) {
+      questions.add({
+        'type': cardMutilChoiceQuestion,
+        'question': question.question,
+        'correctAnswer': question.correctAnswer,
+        'answers': question.answers.map((answer) => answer).toList(),
+      });
+    }
 
-  return questions;
-}
+    for (var question in questionModel.listeningQuestions) {
+      questions.add({
+        'type': listenQuestion,
+        'items': question.items.map((item) => item).toList(),
+        'correctAnswer': question.correctAnswer,
+      });
+    }
+
+    return questions;
+  }
 
   int currentQuestionIndex = 0;
   int countIcorrectQuestion = 0;
@@ -137,7 +140,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   void startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-    _elapsedTime++;
+      _elapsedTime++;
     });
   }
 
@@ -162,49 +165,49 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   void nextQuestion(bool isCorrect, int s) {
     if (isCorrect) {
-      setState(() {
-        score += s;
-        countIcorrectQuestion++;
-        consecutiveCorrect++;
+      setState(
+        () {
+          score += s;
+          countIcorrectQuestion++;
+          consecutiveCorrect++;
 
-        // Kiểm tra chuỗi câu trả lời đúng và hiển thị thông báo
-        if (consecutiveCorrect == 3 ||
-            consecutiveCorrect == 5 ||
-            consecutiveCorrect == 10 ||
-            consecutiveCorrect == 20) {
-          String message = '';
-          String iconSource = '';
-          Color color = Colors.green;
+          // Kiểm tra chuỗi câu trả lời đúng và hiển thị thông báo
+          if (consecutiveCorrect == 3 ||
+              consecutiveCorrect == 5 ||
+              consecutiveCorrect == 10 ||
+              consecutiveCorrect == 20) {
+            String message = '';
+            String iconSource = '';
+            Color color = Colors.green;
 
-          if (consecutiveCorrect == 3) {
-            score += 1;
-            message = "Điểm thưởng +1";
+            if (consecutiveCorrect == 3) {
+              score += 1;
+              message = "Điểm thưởng +1";
 
-            iconSource = "images/streak_3.png";
-          } else if (consecutiveCorrect == 5) {
-            score += 4;
-            message = "Điểm thưởng +4";
-            iconSource = "images/streak_5.png";
-            color = Colors.blue;
-          } else if (consecutiveCorrect == 10) {
-            score += 8;
-            message = "Điểm thưởng +8";
-            iconSource = "images/streak_10.png";
-            color = Colors.yellow;
-          } else if (consecutiveCorrect == 20) {
-            score += 15;
-            message = "Điểm thưởng +15";
-            iconSource = "images/streak_20.png";
-            color = Colors.orange;
-          }
-          showDialog(
+              iconSource = "images/streak_3.png";
+            } else if (consecutiveCorrect == 5) {
+              score += 4;
+              message = "Điểm thưởng +4";
+              iconSource = "images/streak_5.png";
+              color = Colors.blue;
+            } else if (consecutiveCorrect == 10) {
+              score += 8;
+              message = "Điểm thưởng +8";
+              iconSource = "images/streak_10.png";
+              color = Colors.yellow;
+            } else if (consecutiveCorrect == 20) {
+              score += 15;
+              message = "Điểm thưởng +15";
+              iconSource = "images/streak_20.png";
+              color = Colors.orange;
+            }
+            showDialog(
               context: context,
               builder: (BuildContext context) {
-                Future.delayed(const Duration(milliseconds: 1300), () {
+                Future.delayed(const Duration(milliseconds: 500), () {
                   Navigator.of(context)
                       .pop(true); // Đóng hộp thoại sau 0.5 giây
                 });
-                AudioHelper.playSound('bounus'); // Phát âm thanh 'bonus'
                 return AlertDialog(
                   backgroundColor: color,
                   title: Row(
@@ -245,9 +248,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     ],
                   ),
                 );
-              },);
-        }
-      },);
+              },
+            );
+          }
+        },
+      );
     } else {
       setState(() {
         consecutiveCorrect = 0; // Reset chuỗi đúng liên tục nếu trả lời sai
@@ -257,8 +262,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
       if (currentQuestionIndex < questions.length - 1) {
         currentQuestionIndex++;
       } else {
-        
         stopTimer();
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -267,6 +272,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
               score: score,
               rateCompleted:
                   ((countIcorrectQuestion / questions.length) * 100).ceil(),
+              lessonState: widget.lessonState,
+             
             ),
           ),
         );
@@ -276,9 +283,20 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authViewModel = Provider.of<AuthViewModel>(context);
+    if (questions.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  const Home()), // Replace with your new screen
+          (Route<dynamic> route) => false, // This condition removes all routes
+        );
+      });
+      return Container();
+    }
     final question = questions[currentQuestionIndex];
-  
+
     Widget questionWidget = Container();
     switch (question['type']) {
       case completeConversationQuestion:
@@ -388,12 +406,21 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
                 IconButton(
                     onPressed: () {
+                      AudioHelper.disposeAudio();
+                      AudioHelper.disposeTts();
                       if (currentQuestionIndex >= 1) {
                         showAlertDialog(
                             "Nếu bạn thoát sẽ mất toàn bộ điểm đã kiếm được trong bài học này");
                       } else {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          Navigator.pushReplacementNamed(context, '/');
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const Home()), // Replace with your new screen
+                            (Route<dynamic> route) =>
+                                false, // This condition removes all routes
+                          );
                         });
                       }
                     },

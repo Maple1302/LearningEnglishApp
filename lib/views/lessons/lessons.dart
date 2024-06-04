@@ -9,11 +9,21 @@ import 'package:provider/provider.dart';
 
 class Lessons extends StatefulWidget {
   final List<LessonModel> listLesson;
-  final bool enable;
+  final bool isCurrentTopic;
+  final bool isCureentTopicUnlockFull;
+  final int mapId;
+  final int topicId;
+  final bool isMapUnlocked;
+  final bool isCurrentMap;
   const Lessons({
     super.key,
     required this.listLesson,
-    required this.enable,
+    required this.isCurrentTopic,
+    required this.mapId,
+    required this.topicId,
+    required this.isCureentTopicUnlockFull,
+    required this.isMapUnlocked,
+    required this.isCurrentMap,
   });
 
   @override
@@ -22,20 +32,20 @@ class Lessons extends StatefulWidget {
 
 class _LessonsState extends State<Lessons> {
   List<Widget> listLesson = [];
+  List<String> completedLesson = [];
 
   @override
   void initState() {
     super.initState();
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+    completedLesson = authViewModel.user!.completedLessons.split(";");
   }
 
   @override
   Widget build(BuildContext context) {
-    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-
-    List<String> completedLesson =
-        authViewModel.user!.completedLessons.split(";");
     listLesson =
         customListLesson(getListLesson(widget.listLesson, completedLesson));
+
     return Column(children: listLesson);
   }
 
@@ -47,8 +57,8 @@ class _LessonsState extends State<Lessons> {
     );
   }
 
-  Widget lesson(String imageUrl, Color color, String title, String progress,
-      QuestionModel questionModel, int length, bool enable) {
+  Widget lesson(int lessonId, String imageUrl, Color color, String title,
+      String progress, QuestionModel questionModel, int length, bool enable) {
     return (imageUrl == '' || title == '')
         ? Container()
         : Column(
@@ -88,6 +98,12 @@ class _LessonsState extends State<Lessons> {
                               MaterialPageRoute(
                                   builder: (context) => QuestionScreen(
                                         questionModel: questionModel,
+                                        lessonState: [
+                                          widget.mapId.toString(),
+                                          widget.topicId.toString(),
+                                          lessonId.toString(),
+                                          progress
+                                        ],
                                       ) //TopicListScreen(mapModel: map),
                                   ),
                             );
@@ -136,34 +152,62 @@ class _LessonsState extends State<Lessons> {
 
   List<Widget> getListLesson(
       List<LessonModel> listLesson, List<String> lessonCompleted) {
-    List<Widget> listLesson = [];
-    int lessonC = int.parse(lessonCompleted[2]); //lesson
-    int questionC = int.parse(lessonCompleted[3]); //question
-    for (int i = 0; i < widget.listLesson.length; i++) {
-      if (widget.enable) {
-        listLesson.add(lesson(
-            widget.listLesson[i].images, //image
-            lessonC - 1 >= i
-                ? HexColor(widget.listLesson[i].color)
-                : Colors.grey, //color
-            widget.listLesson[i].title, //
-            lessonCompleted[3],
-            widget.listLesson[i].question[questionC - 1],
-            widget.listLesson[i].question.length,
-            i <= questionC - 1));
-      } else {
-        listLesson.add(lesson(
-            widget.listLesson[i].images, //image
-            Colors.grey, //color
-            widget.listLesson[i].title, //
-            lessonCompleted[3],
-            widget.listLesson[i].question[0],
-            widget.listLesson[i].question.length,
-            false));
-      }
+    List<Widget> listLessonWidget = [];
+int lessonC = int.parse(lessonCompleted[2]); // lesson count
+int questionC = int.parse(lessonCompleted[3]); // question count
+
+if (widget.isCurrentMap) {
+  for (int i = 0; i < listLesson.length; i++) {
+    bool isLessonUnlocked = lessonC >= i; // lock full
+    bool isCurrentLesson = lessonC == i; // current lesson
+    bool isEnabled = widget.isCurrentTopic || widget.isCureentTopicUnlockFull; // topic enable
+    Color lessonColor = isLessonUnlocked ? HexColor(listLesson[i].color) : Colors.grey;
+    String questionCount = isLessonUnlocked
+        ? (isCurrentLesson ? lessonCompleted[3] : listLesson[i].question.length.toString())
+        : "0";
+    QuestionModel currentQuestion = isLessonUnlocked
+        ? (isCurrentLesson ? listLesson[i].question[questionC] : listLesson[i].question.last)
+        : listLesson[i].question[0];
+    
+    if (widget.isCureentTopicUnlockFull) {
+      currentQuestion = widget.listLesson[i].question.last;
+      questionCount = widget.listLesson[i].question.length.toString();
+      lessonColor = HexColor(listLesson[i].color);
+      isEnabled = true;
     }
 
-    return listLesson;
+    listLessonWidget.add(
+      lesson(
+        i,
+        listLesson[i].images, // image
+        isEnabled ? lessonColor : Colors.grey, // color
+        listLesson[i].title, // title
+        isEnabled ? questionCount : "0", // question count
+        isEnabled ? currentQuestion : listLesson[i].question[0], // current question
+        listLesson[i].question.length, // total questions
+        isEnabled // is question completed
+      )
+    );
+  }
+} else {
+  for (int i = 0; i < listLesson.length; i++) {
+    listLessonWidget.add(
+      lesson(
+        i,
+        listLesson[i].images, // image
+        HexColor(listLesson[i].color), // color
+        listLesson[i].title, // title
+        listLesson[i].question.length.toString(), // question count
+        listLesson[i].question.last, // current question
+        listLesson[i].question.length, // total questions
+        true // is question completed
+      )
+    );
+  }
+}
+
+return listLessonWidget;
+
   }
 
   static List<Widget> customListLesson(List<Widget> lessons) {

@@ -15,7 +15,6 @@ import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:maple/views/auth/login_view.dart';
 import 'package:maple/views/auth/register_view.dart';
 
-
 import 'package:maple/views/questions/questions_screen.dart';
 import 'package:maple/views/questions/result_screen.dart';
 import 'package:provider/provider.dart';
@@ -31,7 +30,6 @@ Future<void> main() async {
 }
 
 class MyHome extends StatelessWidget {
-
   const MyHome({super.key});
 
   @override
@@ -46,13 +44,14 @@ class MyHome extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => LessonViewModel(),
-        ),ChangeNotifierProvider(
+        ),
+        ChangeNotifierProvider(
           create: (_) => TopicViewModel(),
         ),
         ChangeNotifierProvider(
           create: (_) => SectionViewModel(),
         ),
-         ChangeNotifierProvider(
+        ChangeNotifierProvider(
           create: (_) => MapViewModel(),
         )
       ],
@@ -64,11 +63,30 @@ class MyHome extends StatelessWidget {
               const Home(), // Màn hình đăng nhập là màn hình mặc định
           '/loginview': (context) => const LoginView(),
           '/signup': (context) => const RegisterView(),
-          
-          ResultScreen.routeName: (context) =>
-              const ResultScreen(score: 0, rateCompleted: 0, finalTime: ''),
+
+          ResultScreen.routeName: (context) => const ResultScreen(
+                score: 0,
+                rateCompleted: 0,
+                finalTime: '',
+                lessonState: [],
+               
+              ),
           ResetPasswordView.routeName: (context) => const ResetPasswordView(),
-          QuestionScreen.routeName: (context) =>  QuestionScreen(questionModel:QuestionModel(answersCardQuestions: [], id: '', completeConversationQuestions: [], completeMissingSentenceQuestions: [], imageSelectionQuestions: [], listeningQuestions: [], matchingPairQuestions: [], pronunciationQuestions: [], translationQuestions: [],))
+          QuestionScreen.routeName: (context) => QuestionScreen(
+                questionModel: QuestionModel(
+                  answersCardQuestions: [],
+                  id: '',
+                  completeConversationQuestions: [],
+                  completeMissingSentenceQuestions: [],
+                  imageSelectionQuestions: [],
+                  listeningQuestions: [],
+                  matchingPairQuestions: [],
+                  pronunciationQuestions: [],
+                  translationQuestions: [],
+                ),
+                lessonState: const [],
+                
+              )
         },
       ),
     );
