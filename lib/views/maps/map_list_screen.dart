@@ -448,7 +448,7 @@ class AddMapScreen extends StatelessWidget {
                   },
                 );
               },
-              child: const Text('Add Map'),
+              child: const Text('Thêm phần học mới'),
             ),
           ],
         ),

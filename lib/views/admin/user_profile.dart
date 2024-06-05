@@ -104,25 +104,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ],
                         ),
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            StatCard(
-                              icon: 'images/trophy.png',
-                              value: 'Lam Ngọc',
-                              label: 'Giải đấu hiện tại',
-                            ),
-                            StatCard(
-                              icon: 'images/medal.png',
-                              value: '4',
-                              label: 'Số lần đạt top 3',
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
-                  const Divider(),
                   // Additional achievements or other sections can go here
                 ],
               ),
@@ -209,7 +193,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     textEditingController[0].text = user!.username!;
     textEditingController[1].text = user.email!;
     textEditingController[2].text = '●●●●●●●●';
-   
+
     Future<void> getImage() async {
       final pickedFile = await picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
@@ -255,16 +239,16 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                   gem: user.gem,
                   kN: user.kN,
                   lastCompletionDate: user.lastCompletionDate);
-             
-              if(authViewModel.user != newUser){
-                 // ignore: use_build_context_synchronously
-                  authViewModel.updateUser(newUser);
-                 // ignore: use_build_context_synchronously
-                 ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Lưu thay đổi thành công')),
-              );
+
+              if (authViewModel.user != newUser) {
+                // ignore: use_build_context_synchronously
+                authViewModel.updateUser(newUser);
+                // ignore: use_build_context_synchronously
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Lưu thay đổi thành công')),
+                );
               }
-             
+
               // ignore: use_build_context_synchronously
               Navigator.pop(context);
             },
@@ -550,7 +534,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     });
                   }
                 },
-                child: const Text('LƯU LẠI'),
+                style: ElevatedButton.styleFrom(
+                
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.all(15),
+                 
+                ),
+                child: const Text('Đổi mật khẩu',  style:TextStyle(color: Colors.white),),
               ),
             ],
           ),
