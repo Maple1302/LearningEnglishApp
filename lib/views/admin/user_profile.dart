@@ -166,21 +166,15 @@ class ProfileEditPage extends StatefulWidget {
 }
 
 class _ProfileEditPageState extends State<ProfileEditPage> {
-  dynamic images;
+  File? imageFile;
   String imageUrl = '';
 
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final authViewModel = Provider.of<AuthViewModel>(context);
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
     UserModel? user = authViewModel.user;
-    images = user!.urlAvatar;
-    imageUrl = user.urlAvatar;
+    imageUrl = user?.urlAvatar ?? '';
   }
 
   @override
@@ -190,15 +184,17 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     final picker = ImagePicker();
     List<TextEditingController> textEditingController =
         List.generate(3, (index) => TextEditingController());
-    textEditingController[0].text = user!.username!;
-    textEditingController[1].text = user.email!;
-    textEditingController[2].text = '●●●●●●●●';
+    if (user != null) {
+      textEditingController[0].text = user.username!;
+      textEditingController[1].text = user.email!;
+      textEditingController[2].text = '●●●●●●●●';
+    }
 
     Future<void> getImage() async {
       final pickedFile = await picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
         setState(() {
-          images = File(pickedFile.path);
+          imageFile = File(pickedFile.path);
         });
       }
     }
@@ -219,10 +215,10 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         actions: [
           TextButton(
             onPressed: () async {
-              if (images is File) {
-                imageUrl = await uploadImageToFirebase(images);
+              if (imageFile != null) {
+                imageUrl = await uploadImageToFirebase(imageFile!);
               }
-              imageUrl == user.urlAvatar ? user.urlAvatar : imageUrl;
+              if(user != null){
               UserModel newUser = UserModel(
                   uid: user.uid,
                   role: user.role,
@@ -239,9 +235,8 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                   gem: user.gem,
                   kN: user.kN,
                   lastCompletionDate: user.lastCompletionDate);
-
+              
               if (authViewModel.user != newUser) {
-                // ignore: use_build_context_synchronously
                 authViewModel.updateUser(newUser);
                 // ignore: use_build_context_synchronously
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -251,6 +246,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
               // ignore: use_build_context_synchronously
               Navigator.pop(context);
+              }
             },
             child: const Text(
               'LƯU LẠI',
@@ -281,24 +277,19 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                               height:
                                   100, // Increase the height for a larger image
                               color: Colors.grey[300],
-                              child: (images != null || images != '')
-                                  ? (images is File
-                                      ? Image.file(
-                                          images,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : Image.network(images as String,
-                                          fit: BoxFit.cover, errorBuilder:
-                                              (BuildContext context,
-                                                  Object exception,
-                                                  StackTrace? stackTrace) {
-                                          return const Icon(Icons.person);
-                                        }))
-                                  : const Center(
-                                      child: Icon(
-                                        Icons.person,
-                                        size: 100, // Increase the icon size
-                                      ),
+                              child: imageFile != null
+                                  ? Image.file(
+                                      imageFile!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.network(
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (BuildContext context,
+                                          Object exception,
+                                          StackTrace? stackTrace) {
+                                        return const Icon(Icons.person);
+                                      },
                                     ),
                             ),
                           ),
@@ -313,6 +304,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             const SizedBox(height: 16),
             buildTextField('Tên', textEditingController[0], false),
             buildTextField('Email', textEditingController[1], true),
+            if(user!=null)
             if (user.signInMethod == 'email')
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -358,8 +350,17 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 authViewModel.signOut();
                 Navigator.pushReplacementNamed(context, '/');
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-              child: const Text('Đăng xuất'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.all(15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                'Đăng xuất',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),
@@ -368,7 +369,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   }
 
   Widget buildTextField(
-      String label, TextEditingController controller, readonly) {
+      String label, TextEditingController controller, bool readonly) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
@@ -535,12 +536,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                
                   backgroundColor: Colors.blue,
                   padding: const EdgeInsets.all(15),
-                 
                 ),
-                child: const Text('Đổi mật khẩu',  style:TextStyle(color: Colors.white),),
+                child: const Text(
+                  'Đổi mật khẩu',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),

@@ -972,9 +972,15 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                           typesection
                         ];
                         Navigator.pop(context, backData);
-                      },
+                      },  style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                       child:
-                          Text(widget.add ? ' Thêm câu hỏi' : 'Lưu thay đổi'),
+                          Text(widget.add ? ' Thêm câu hỏi' : 'Lưu thay đổi',style: const TextStyle(color: Colors.white),),
                     ),
                   ],
                 )),
@@ -1059,8 +1065,14 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                         typesection
                       ];
                       Navigator.pop(context, backData);
-                    },
-                    child: Text(widget.add ? "Thêm câu hỏi" : "Lưu thay đổi"),
+                    },  style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                    child: Text(widget.add ? "Thêm câu hỏi" : "Lưu thay đổi",style: const TextStyle(color: Colors.white),),
                   ),
                 ],
               )),
@@ -1175,9 +1187,15 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                               typesection
                             ];
                             Navigator.pop(context, backData);
-                          },
+                          },  style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                           child: Text(
-                              widget.add ? "Thêm câu hỏi" : "Lưu thay đổi"),
+                              widget.add ? "Thêm câu hỏi" : "Lưu thay đổi",style:const TextStyle(color: Colors.white),),
                         ),
                       ],
                     ))
@@ -1245,8 +1263,14 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                           typesection
                         ];
                         Navigator.pop(context, backData);
-                      },
-                      child: Text(widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi'),
+                      },  style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                      child: Text(widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi',style:const TextStyle(color: Colors.white),),
                     ),
                   ],
                 )),
@@ -1418,9 +1442,15 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                                   Navigator.pop(context, backData);
                                 }
                               }
-                            },
+                            },  style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                             child: Text(
-                                widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi'),
+                                widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi',style:const TextStyle(color: Colors.white),),
                           ),
                         ],
                       ))
@@ -1490,8 +1520,15 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                               ];
                               Navigator.pop(context, backData);
                             },
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                             child: Text(
-                                widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi'),
+                                widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi',style:const TextStyle(color: Colors.white),),
                           ),
                         ],
                       ))
@@ -1570,9 +1607,15 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                                 typesection
                               ];
                               Navigator.pop(context, backData);
-                            },
+                            },  style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                             child: Text(
-                                widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi'),
+                                widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi',style:const TextStyle(color: Colors.white),),
                           ),
                         ],
                       ))
@@ -1653,9 +1696,15 @@ class _EditQuestionByTypeState extends State<EditQuestionByType> {
                               typesection
                             ];
                             Navigator.pop(context, backData);
-                          },
+                          },  style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                           child: Text(
-                              widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi'),
+                              widget.add ? "Thêm câu hỏi" : 'Lưu thay đổi',style:const TextStyle(color: Colors.white),),
                         ),
                       ],
                     ))

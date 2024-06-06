@@ -296,7 +296,14 @@ class AddTopicScreen extends StatelessWidget {
                 Navigator.pop(context, backData);
                 _showSuccessDialog(context, 'Thêm ${topic.description} thành công');
               },
-              child: const Text('Thêm Topic'),
+                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+              child: const Text('Thêm Topic',style: TextStyle(color: Colors.white),),
             ),
           ],
         ),
@@ -408,7 +415,14 @@ class _EditTopicScreenState extends State<EditTopicScreen> {
                 Navigator.pop(context, updatedTopic);
                 _showSuccessDialog(context, 'Cập nhật ${widget.topic.description} thành công');
               },
-              child: const Text('Lưu thay đổi'),
+                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+              child: const Text('Lưu thay đổi',style: TextStyle(color: Colors.white),),
             ),
           ],
         ),

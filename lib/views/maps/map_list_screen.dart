@@ -21,7 +21,7 @@ class _MapListScreenState extends State<MapListScreen> {
   Widget build(BuildContext context) {
     final viewModel = Provider.of<MapViewModel>(context, listen: false);
 
-    return Scaffold(
+    return  Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
         title: Consumer<AuthViewModel>(
@@ -390,7 +390,14 @@ class _EditMapScreenState extends State<EditMapScreen> {
                   },
                 );
               },
-              child: const Text('Lưu thay đổi'),
+                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+              child: const Text('Lưu thay đổi',style: TextStyle(color: Colors.white),),
             ),
           ],
         ),
@@ -448,7 +455,14 @@ class AddMapScreen extends StatelessWidget {
                   },
                 );
               },
-              child: const Text('Thêm phần học mới'),
+                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+              child: const Text('Thêm phần học mới',style: TextStyle(color: Colors.white),),
             ),
           ],
         ),

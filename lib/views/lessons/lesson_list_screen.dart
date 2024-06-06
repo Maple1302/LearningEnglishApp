@@ -285,7 +285,14 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: getImage,
-                    child: const Text('Chọn ảnh từ bộ sưu tập'),
+                      style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                    child: const Text('Chọn ảnh từ bộ sưu tập',style: TextStyle(color: Colors.white),),
                   ),
                   const SizedBox(height: 20),
                   if (_image != null)
@@ -339,7 +346,14 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
                       _showSuccessDialog(
                           'Cập nhật bài học ${updatedLesson.description} thành công');
                     },
-                    child: const Text('Lưu thay đổi'),
+                      style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                    child: const Text('Lưu thay đổi',style: TextStyle(color: Colors.white),),
                   ),
                 ],
               ),
@@ -446,7 +460,14 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: getImage,
-                    child: const Text('Chọn ảnh từ bộ sưu tập'),
+                      style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                    child: const Text('Chọn ảnh từ bộ sưu tập',style: TextStyle(color: Colors.white),),
                   ),
                   const SizedBox(height: 20),
                   if (_image != null)
@@ -502,7 +523,14 @@ class _AddLessonScreenState extends State<AddLessonScreen> {
                         }
                       }
                     },
-                    child: const Text('Thêm bài học mới'),
+                      style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.all(15),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                    child: const Text('Thêm bài học mới',style: TextStyle(color: Colors.white),),
                   ),
                 ],
               ),

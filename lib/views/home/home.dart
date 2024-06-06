@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:maple/views/admin/user_profile.dart';
-import 'package:maple/views/admin/static_view.dart';
 import 'package:maple/views/auth/login_view.dart';
 import 'package:maple/views/maps/map_list_screen.dart';
 
@@ -21,9 +20,6 @@ class _HomeState extends State<Home> {
 
   final List<Widget> _pages = [
     const MapListScreen(),
-    const HomePage(),
-   
-    const StatisticsScreen(),
      const ProfileScreen(),
     
     
@@ -55,10 +51,7 @@ class _HomeState extends State<Home> {
 
   final List<BottomNavigationBarItem> bottomnavigationBarItems = [
     getBottomNavItem('images/house.png'),
-    getBottomNavItem('images/dumbbell.png'),
-    getBottomNavItem('images/rank-icon.png'),
     getBottomNavItem('images/woman.png'),
-    getBottomNavItem('images/treasure.png'),
   ];
 
   @override

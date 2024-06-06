@@ -4,6 +4,7 @@ import 'package:maple/UI/rive_animation.dart';
 import 'package:maple/main.dart';
 import 'package:maple/views/auth/register_view.dart';
 import 'package:maple/views/auth/reset_password_view.dart';
+import 'package:maple/views/home/home.dart';
 import 'package:provider/provider.dart';
 import 'package:maple/viewmodels/auth_viewmodel.dart';
 import 'package:sign_in_button/sign_in_button.dart';
@@ -71,7 +72,11 @@ class _LoginViewState extends State<LoginView> {
 
           void goToHomePage() {
             
-            navigatorKey.currentState?.pushReplacementNamed('/');
+            Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Home()),
+                    (Route<dynamic> route) => false,
+                  );
           }
 
           Widget googleSignInButton() {
